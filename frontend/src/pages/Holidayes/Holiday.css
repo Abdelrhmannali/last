@@ -1,0 +1,334 @@
+/* Page Wrapper */
+.holiday-page-wrapper {
+  background: linear-gradient(135deg, #f5f7fa, #f8fafc); /* نفس الخلفية الفاتحة */
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; /* توحيد الخط مع Bootstrap */
+  padding: 1.5rem 1rem;
+}
+
+/* Header */
+.holiday-header {
+  background: rgba(255, 255, 255, 0.2); /* نفس تأثير الشفافية في الـ sidebar */
+  backdrop-filter: blur(6px); /* تقليل الـ blur للتناسق مع الـ sidebar */
+  border-radius: 12px; /* نفس الـ border-radius للأزرار في الـ sidebar */
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* ظل مشابه */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Section Title */
+.holiday-section-title {
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--bs-primary); /* لون موحد مع الـ sidebar */
+  letter-spacing: 0.5px;
+}
+
+/* Glass Card for Holidays */
+.holiday-glass-card {
+  background: rgba(255, 255, 255, 0.06); /* خلفية زجاجية مشابهة لأزرار الـ sidebar */
+  backdrop-filter: blur(6px); /* نفس تأثير الـ blur */
+  border-radius: 12px; /* نفس الـ border-radius */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.holiday-glass-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.12); /* نفس تأثير hover في الـ sidebar */
+}
+
+/* Card Title */
+.holiday-card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Date Text */
+.holiday-date-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--bs-primary); /* لون موحد */
+  text-align: center;
+}
+
+/* Badges */
+.holiday-date-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--bs-primary);
+}
+
+/* Alert */
+.holiday-alert-message {
+  font-size: 0.9rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Modal */
+.holiday-modal-card .modal-content {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  margin: 0 auto;
+  max-height: 95vh;
+  overflow: hidden;
+}
+
+.holiday-modal-card .modal-header {
+  background: var(--bs-primary); /* لون موحد مع الـ sidebar */
+  border-bottom: none;
+  padding: 0.75rem 1rem;
+  color: #fff;
+}
+
+.holiday-modal-card .modal-body {
+  padding: 1rem;
+  background: #ffffff;
+}
+
+/* Form */
+.glass-form-card {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-form-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.holiday-form-label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--bs-primary); /* لون موحد */
+  margin-bottom: 0.5rem;
+}
+
+.holiday-form-control {
+  border-radius: 0.5rem;
+  border: 2px solid var(--bs-primary);
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.holiday-form-control:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 8px rgba(13, 110, 253, 0.3); /* ظل بلون الـ primary */
+}
+
+/* Buttons */
+.holiday-btn-primary {
+  background: var(--bs-primary);
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.holiday-btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--bs-primary);
+  opacity: 0.9;
+}
+
+.holiday-btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--bs-primary);
+  color: var(--bs-primary);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.holiday-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.holiday-btn-outline-primary {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.holiday-btn-outline-primary:hover {
+  background: var(--bs-primary);
+  color: #fff;
+}
+
+.holiday-btn-outline-danger {
+  border-color: #dc3545; /* لون الـ danger من Bootstrap */
+  color: #dc3545;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.holiday-btn-outline-danger:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* Slide-in Animation */
+.slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in:nth-child(1) { animation-delay: 0.1s; }
+.slide-in:nth-child(2) { animation-delay: 0.2s; }
+.slide-in:nth-child(3) { animation-delay: 0.3s; }
+.slide-in:nth-child(4) { animation-delay: 0.4s; }
+.slide-in:nth-child(5) { animation-delay: 0.5s; }
+.slide-in:nth-child(6) { animation-delay: 0.6s; }
+
+/* Responsive Tweaks */
+@media (max-width: 576px) {
+  .holiday-page-wrapper {
+    padding: 1rem 0.5rem;
+  }
+
+  .holiday-section-title {
+    font-size: 1.5rem;
+  }
+
+  .holiday-header {
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .holiday-glass-card {
+    min-height: 180px;
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .holiday-card-title {
+    font-size: 1.1rem;
+  }
+
+  .holiday-date-text {
+    font-size: 0.9rem;
+  }
+
+  .holiday-date-badge,
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .holiday-form-label {
+    font-size: 0.9rem;
+  }
+
+  .holiday-form-control {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .holiday-btn-primary,
+  .holiday-btn-secondary {
+    font-size: 0.9rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .holiday-btn-outline-primary,
+  .holiday-btn-outline-danger {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+  }
+
+  .holiday-modal-card .modal-content {
+    max-width: 90vw;
+    border-radius: 8px;
+  }
+
+  .glass-form-card {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}
+
+@media (max-height: 500px) {
+  .holiday-modal-card .modal-content {
+    max-height: 95vh;
+  }
+
+  .glass-form-card {
+    padding: 0.75rem;
+  }
+
+  .holiday-form-label {
+    font-size: 0.85rem;
+  }
+
+  .holiday-form-control {
+    font-size: 0.85rem;
+  }
+
+  .holiday-btn-primary,
+  .holiday-btn-secondary {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+  }
+
+  .holiday-glass-card {
+    min-height: 160px;
+  }
+
+  .holiday-card-title {
+    font-size: 1rem;
+  }
+
+  .holiday-date-text {
+    font-size: 0.85rem;
+  }
+}

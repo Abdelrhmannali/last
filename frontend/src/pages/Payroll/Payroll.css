@@ -1,0 +1,257 @@
+/* Glass Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.06); /* نفس خلفية أزرار الـ sidebar */
+  backdrop-filter: blur(6px); /* موحد مع الـ sidebar */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* حدود مشابهة */
+  border-radius: 12px; /* نفس الـ border-radius في الـ sidebar */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* انتقال سلس زي الـ sidebar */
+  min-height: 80px;
+  text-align: center;
+  padding: 0.8rem;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px); /* نفس تأثير hover في الـ sidebar */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* ظل مشابه */
+  background: rgba(255, 255, 255, 0.12); /* نفس تأثير الـ sidebar buttons */
+}
+
+/* Employee Profile Avatar */
+.employee-profile-avatar {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--bs-primary); /* لون موحد مع الـ sidebar */
+  box-shadow: 0 0 4px rgba(13, 110, 253, 0.2); /* ظل بلون الـ primary */
+  margin-bottom: 0.5rem;
+}
+
+/* Text clarity improvements */
+.glass-card h6 {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem;
+  color: #333; /* نفس لون النصوص في الـ holiday page */
+}
+
+.glass-card p {
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 0;
+  color: #1a1a1a; /* نفس لون النصوص */
+}
+
+/* Preserve original text colors */
+.glass-card p.text-success {
+  color: #28a745; /* لون قياسي موحد */
+}
+
+.glass-card p.text-danger {
+  color: #dc3545; /* لون قياسي موحد */
+}
+
+.glass-card p.text-info {
+  color: #17a2b8; /* لون قياسي موحد */
+}
+
+.glass-card p.text-primary {
+  color: var(--bs-primary); /* موحد مع الـ sidebar */
+}
+
+/* Modal Dialog */
+.compact-modal .modal-dialog {
+  max-width: 95vw;
+  width: 100%;
+  margin: 1vh auto;
+  min-height: auto;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Modal Content */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.2); /* خلفية زجاجية زي الـ sidebar */
+  backdrop-filter: blur(6px); /* موحد */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px; /* نفس الـ border-radius */
+  overflow: hidden;
+  min-height: auto;
+  max-height: 95vh;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* ظل مشابه */
+}
+
+/* Modal Body */
+.modal-body {
+  flex: 1 1 auto;
+  padding: 0.6rem;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* Modal Header */
+.modal-header {
+  background: var(--bs-primary); /* لون موحد مع الـ sidebar */
+  border-bottom: none;
+  padding: 0.6rem 0.8rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.modal-header .btn-close {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.modal-header .btn-close:hover {
+  transform: rotate(90deg);
+}
+
+/* Section Divider */
+.section-divider {
+  border-top: 1px solid rgba(13, 110, 253, 0.2); /* لون موحد مع الـ primary */
+  margin: 0.4rem 0;
+}
+
+/* Slide-in Animation */
+.slide-in {
+  animation: slideIn 0.3s ease-out forwards; /* موحد مع الـ holiday page */
+  opacity: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in:nth-child(1) { animation-delay: 0.1s; }
+.slide-in:nth-child(2) { animation-delay: 0.2s; }
+.slide-in:nth-child(3) { animation-delay: 0.3s; }
+.slide-in:nth-child(4) { animation-delay: 0.4s; }
+.slide-in:nth-child(5) { animation-delay: 0.5s; }
+.slide-in:nth-child(6) { animation-delay: 0.6s; }
+.slide-in:nth-child(7) { animation-delay: 0.7s; }
+
+/* Search Input */
+.search-input {
+  max-width: 250px;
+  border-color: var(--bs-primary); /* لون موحد */
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Employee Avatar */
+.employee-avatar {
+  border-radius: 50%;
+  border: 1px solid var(--bs-primary); /* لون موحد */
+  box-shadow: 0 0 2px rgba(13, 110, 253, 0.2); /* ظل موحد */
+  width: 24px;
+  height: 24px;
+}
+
+/* Table Text Ellipsis */
+.text-ellipsis {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Table No Wrap */
+.table-nowrap {
+  white-space: nowrap;
+}
+
+/* Optimize row spacing */
+.row.g-1 {
+  margin-bottom: 0.4rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .compact-modal .modal-dialog {
+    max-width: 98vw;
+    margin: 0.5vh auto;
+    max-height: 95vh;
+  }
+
+  .glass-card {
+    min-height: 60px;
+    padding: 0.6rem;
+    border-radius: 8px; /* تقليل الـ border-radius للشاشات الصغيرة */
+  }
+
+  .glass-card h6 {
+    font-size: 0.85rem !important;
+  }
+
+  .glass-card p {
+    font-size: 0.75rem !important;
+  }
+
+  .employee-profile-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .modal-body {
+    padding: 0.5rem;
+  }
+
+  .modal-header {
+    padding: 0.5rem 0.6rem;
+  }
+
+  .search-input {
+    max-width: 200px;
+    font-size: 0.75rem;
+  }
+
+  .table-nowrap {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .compact-modal .modal-dialog {
+    max-height: 98vh;
+  }
+
+  .glass-card {
+    min-height: 50px;
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+
+  .glass-card h6 {
+    font-size: 0.75rem !important;
+  }
+
+  .glass-card p {
+    font-size: 0.65rem !important;
+  }
+
+  .modal-body {
+    padding: 0.4rem;
+  }
+
+  .section-divider {
+    margin: 0.3rem 0;
+  }
+
+  .employee-profile-avatar {
+    width: 50px;
+    height: 50px;
+  }
+}

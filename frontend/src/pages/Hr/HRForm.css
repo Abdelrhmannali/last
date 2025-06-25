@@ -1,0 +1,65 @@
+.hr-page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #f5f7fa; /* خلفية الصفحة فاتحة */
+}
+
+.hr-glass-card {
+  background: #ffffff; /* خلفية بيضاء للفورم */
+  border-radius: 60px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  color: #333;
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+}
+
+.hr-form-title {
+  color: var(--bs-primary);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form-control {
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  padding: 0.6rem 1rem;
+  color: #333;
+  background-color: #fff;
+}
+
+.form-control:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.2);
+}
+
+input[type="file"]::file-selector-button {
+  background-color: var(--bs-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+}
+
+.hr-img-preview {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--bs-primary);
+  display: block;
+  margin: 0 auto 1rem;
+}
+
+.hr-btn {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 10px;
+  font-weight: 500;
+}

@@ -1,0 +1,250 @@
+.edit-employee-container {
+  width: 100%;
+  max-width: 950px;  /* مناسب بجانب الـ sidebar */
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  color: #000;
+  overflow: visible; /* نلغي الاسكرول */
+}
+
+.edit-employee-container h2 {
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: var(--bs-primary);
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.edit-employee-container .form-control,
+.edit-employee-container .form-select {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.edit-employee-container button[type="submit"] {
+  padding: 12px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-radius: 12px;
+  background-color: var(--bs-primary);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.edit-employee-container button[type="submit"]:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+
+
+
+
+
+
+
+
+
+
+.employees-page {
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* Header Section */
+.employees-header {
+  margin-bottom: 1rem;
+}
+
+.employees-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--bs-primary);
+}
+
+.employees-add-btn {
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 12px;
+}
+
+/* Search Form */
+.employees-search-form {
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.employees-search-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.employees-search-btn,
+.employees-reset-btn {
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Table */
+.employees-table {
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 0.95rem;
+}
+
+.employees-row td {
+  vertical-align: middle;
+}
+
+.employee-avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #dee2e6;
+}
+
+/* Action Buttons */
+.employee-show-btn,
+.employee-edit-btn,
+.employee-delete-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+/* Pagination */
+.employees-pagination {
+  margin-top: 1rem;
+  gap: 4px;
+}
+
+.employees-page-btn {
+  min-width: 34px;
+  padding: 5px 10px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .employees-title {
+    font-size: 1.25rem;
+  }
+
+  .employee-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .employees-search-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .employees-search-input {
+    width: 100%;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* AddEmployee.css */
+/* AddEmployee.css */
+.add-employee-container {
+  max-width: 1100px;
+  margin: 1.5rem auto;
+  padding: 1.5rem 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  color: #000;
+  min-height: calc(100vh - 80px); /* يمنع السكروول ويملأ الصفحة */
+  overflow: hidden;
+}
+
+.add-employee-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  color: var(--bs-primary);
+}
+
+.add-employee-container .form-label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.add-employee-container .form-control,
+.add-employee-container .form-select {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.add-employee-container .form-check-label {
+  font-size: 0.9rem;
+}
+
+.add-employee-container .form-check {
+  margin-right: 10px;
+}
+
+button[type="submit"] {
+  margin-top: 1rem;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: var(--bs-primary);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  transform: scale(1.02);
+  opacity: 0.95;
+}
+
+.alert {
+  padding: 4px 8px !important;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
