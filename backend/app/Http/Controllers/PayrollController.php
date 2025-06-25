@@ -158,21 +158,25 @@ class PayrollController extends Controller
             $monthEnd = $monthStart->copy()->endOfMonth();
             $monthDays = $monthStart->daysInMonth;
 
-            // Safely handle weekend_days
-            $weekend_days = $generalSettings->weekend_days ?? ['Saturday', 'Sunday'];
-            if (!is_array($weekend_days)) {
-                Log::warning("Unexpected type for weekend_days for employee {$employee->id}", ['value' => $weekend_days]);
-                $weekend_days = ['Saturday', 'Sunday'];
-            }
+    $weekend_days = json_decode($generalSettings->weekend_days, true) ?? ['Saturday', 'Sunday'];
 
-            $officialHolidays = Holiday::whereBetween('date', [$monthStart, $monthEnd])
-                ->pluck('date')
-                ->map(fn($d) => Carbon::parse($d)->toDateString())
-                ->toArray();
+if (!is_array($weekend_days)) {
+    Log::warning("Invalid weekend_days format for employee {$employee->id}", [
+        'value' => $generalSettings->weekend_days,
+    ]);
+    $weekend_days = ['Saturday', 'Sunday'];
+}
 
-            $businessDays = collect(CarbonPeriod::create($monthStart, $monthEnd))
-                ->reject(fn($date) => in_array($date->format('l'), $weekend_days) || in_array($date->toDateString(), $officialHolidays))
-                ->count();
+$officialHolidays = Holiday::whereBetween('date', [$monthStart, $monthEnd])
+    ->pluck('date')
+    ->map(fn($d) => Carbon::parse($d)->toDateString())
+    ->toArray();
+
+$period = CarbonPeriod::create($monthStart->copy(), $monthEnd->copy());
+
+$businessDays = collect($period)->filter(function ($date) use ($weekend_days, $officialHolidays) {
+    return !in_array($date->format('l'), $weekend_days) && !in_array($date->toDateString(), $officialHolidays);
+})->count();
 
             $attendances = Attendence::where('employee_id', $employee->id)
                 ->whereBetween('date', [$monthStart, $monthEnd])

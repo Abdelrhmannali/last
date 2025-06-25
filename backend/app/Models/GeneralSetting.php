@@ -6,10 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GeneralSetting extends Model
 {
-    protected $casts = [
-        'weekend_days' => 'array',
-    ];
-
+ 
     protected $fillable = [
         'employee_id',
         'deduction_type',
@@ -18,6 +15,10 @@ class GeneralSetting extends Model
         'overtime_value',
         'weekend_days',
     ];
+    protected $casts = [
+    'weekend_days' => 'array',
+];
+
 
     public function employee()
     {

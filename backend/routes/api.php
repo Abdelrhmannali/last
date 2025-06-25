@@ -17,7 +17,7 @@ use App\Http\Controllers\{
 // ==================
 
 Route::post('/hr/login', [HRController::class, 'login']);
-    Route::post('/hr/AddHr', [HRController::class, 'AddHr']);
+   
 
 // ==================
 // Protected routes
@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/hr/update', [HRController::class, 'update']);
     Route::post('/hr/logout', [HRController::class, 'logout']);
+     Route::post('/hr/AddHr', [HRController::class, 'AddHr']);
     Route::get('/dashboard', fn() => response()->json(['message' => 'Welcome HR']));
 
     // Employees
