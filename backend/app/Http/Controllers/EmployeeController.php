@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\GeneralSetting;
 use App\Models\Payroll;
 use App\Models\Attendence;
+use App\Notifications\EmployeeActionNotification;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -36,6 +37,7 @@ class EmployeeController extends Controller
      * Store a new employee record in the database.
      * Handle validation, image upload, and save all employee data.
      * Also create default GeneralSetting and Payroll records.
+     * Send notification to employee's email.
      */
     public function store(Request $request)
     {
@@ -54,7 +56,6 @@ class EmployeeController extends Controller
             'national_id' => 'required|digits:14|unique:employees,national_id',
             'birthdate' => 'required|date|before_or_equal:' . Carbon::now()->subYears(20)->toDateString(),
             'department_id' => 'nullable|exists:departments,id',
-         
             'working_hours_per_day' => 'required|integer|min:1|max:24',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -69,34 +70,39 @@ class EmployeeController extends Controller
 
         GeneralSetting::create([
             'employee_id' => $employee->id,
-            'weekend_days' => json_encode(['Friday', 'Saturday']), // Default weekend days
+            'weekend_days' => json_encode(['Friday', 'Saturday']),
             'deduction_type' => 'money',
             'deduction_value' => 0,
             'overtime_type' => 'money',
             'overtime_value' => 0,
         ]);
+
         $existingPayroll = Payroll::where('employee_id', $employee->id)
-    ->where('month', now()->format('Y-m'))
-    ->first();
+            ->where('month', now()->format('Y-m'))
+            ->first();
 
-if (!$existingPayroll) {
-    Payroll::create([
-        'employee_id' => $employee->id,
-        'month' => now()->format('Y-m'),
-        'month_days' => now()->daysInMonth,
-        'attended_days' => 0,
-        'absent_days' => 0,
-        'total_overtime' => 0,
-        'total_bonus_amount' => 0,
-        'total_deduction_amount' => 0,
-        'net_salary' => $employee->salary,
-        'absence_deduction_amount' => 0,
-        'late_deduction_amount' => 0,
-    ]);
-}
+        if (!$existingPayroll) {
+            Payroll::create([
+                'employee_id' => $employee->id,
+                'month' => now()->format('Y-m'),
+                'month_days' => now()->daysInMonth,
+                'attended_days' => 0,
+                'absent_days' => 0,
+                'total_overtime' => 0,
+                'total_bonus_amount' => 0,
+                'total_deduction_amount' => 0,
+                'net_salary' => $employee->salary,
+                'absence_deduction_amount' => 0,
+                'late_deduction_amount' => 0,
+            ]);
+        }
 
-
-      
+        // إرسال إشعار إلى بريد الموظف
+        try {
+            $employee->notify(new EmployeeActionNotification($employee, 'added'));
+        } catch (\Exception $e) {
+            Log::error("Failed to send notification to employee {$employee->email}: " . $e->getMessage());
+        }
 
         return response()->json([
             'message' => 'Employee added successfully.',
@@ -151,7 +157,6 @@ if (!$existingPayroll) {
             'national_id' => 'sometimes|required|digits:14|unique:employees,national_id,' . $id,
             'birthdate' => 'sometimes|required|date|before_or_equal:' . Carbon::now()->subYears(20)->toDateString(),
             'department_id' => 'nullable|exists:departments,id',
-       
             'working_hours_per_day' => 'sometimes|required|integer|min:1|max:24',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'general_setting.deduction_type' => 'nullable|string',
@@ -171,18 +176,15 @@ if (!$existingPayroll) {
             $validatedData['profile_picture'] = $path;
         }
 
-      
-
         $employee->update($validatedData);
 
         // Update GeneralSetting if provided
         if ($request->has('general_setting')) {
             $gsData = $request->input('general_setting');
-            // JSON-encode weekend_days if provided
             if (array_key_exists('weekend_days', $gsData)) {
                 $gsData['weekend_days'] = json_encode($gsData['weekend_days']);
             } elseif (!array_key_exists('weekend_days', $gsData)) {
-                $gsData['weekend_days'] = json_encode($employee->weekend_days);
+                $gsData['weekend_days'] = json_encode($employee->weekend_days ?? ['Friday', 'Saturday']);
             }
             $employee->generalSetting()->updateOrCreate(
                 ['employee_id' => $employee->id],
@@ -222,12 +224,16 @@ if (!$existingPayroll) {
 
     /**
      * Delete an employee and their related records.
+     * Send notification to employee's email before deletion.
      */
     public function destroy($id)
     {
         $employee = Employee::findOrFail($id);
 
         try {
+            // إرسال إشعار إلى بريد الموظف
+            $employee->notify(new EmployeeActionNotification($employee, 'deleted'));
+
             // Delete profile picture if it exists
             if ($employee->profile_picture && Storage::disk('public')->exists($employee->profile_picture)) {
                 Storage::disk('public')->delete($employee->profile_picture);

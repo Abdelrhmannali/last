@@ -61,15 +61,14 @@ class DepartmentController extends Controller
         ], 200);
     }
 
-   
-   
-    public function departmentsWithEmployees()
-    {
-        // Load departments with their employees (only selected fields)
-        $departments = Department::with(['employees:id,first_name,last_name,department_id'])->get();
+public function departmentsWithEmployees()
+{
+    $departments = Department::with('employees')->get();
 
-        return response()->json([
-            'data' => $departments
-        ], 200);
-    }
+    return response()->json([
+        'data' => $departments
+    ], 200);
+}
+
+
 }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Card, Form, Button, Spinner, InputGroup } from "react-bootstrap";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Form, Spinner } from "react-bootstrap";
+import { FaUserPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 import api from "../../api";
 import "./HRForm.css";
 import { toast, ToastContainer } from "react-toastify";
@@ -25,7 +25,7 @@ export default function AddHrPage() {
     const { name, value, files } = e.target;
     if (name === "profile_picture") {
       setForm({ ...form, profile_picture: files[0] });
-      setPreview(URL.createObjectURL(files[0]));
+      setPreview(files[0] ? URL.createObjectURL(files[0]) : null);
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -39,6 +39,7 @@ export default function AddHrPage() {
 
     if (form.password !== form.confirmPassword) {
       setFormError("Passwords do not match.");
+      toast.error("Passwords do not match!", { position: "top-right", autoClose: 3000 });
       setLoading(false);
       return;
     }
@@ -68,10 +69,14 @@ export default function AddHrPage() {
   return (
     <div className="hr-page-wrapper">
       <ToastContainer />
-      <Card className="hr-glass-card p-4">
-        <h3 className="hr-form-title">Add New HR</h3>
+      <div className="hr-glass-card p-4">
+        <div className="header-title">
+          <FaUserPlus className="header-icon" />
+          <h3 className="hr-form-title">Add New HR</h3>
+        </div>
+        {formError && <div className="form-error">{formError}</div>}
         <Form onSubmit={handleSubmit} encType="multipart/form-data">
-          <Form.Group className="mb-3">
+          <div className="form-group">
             <Form.Label>Name</Form.Label>
             <Form.Control
               name="name"
@@ -79,10 +84,11 @@ export default function AddHrPage() {
               onChange={handleChange}
               required
               placeholder="Enter name"
+              className="form-input"
             />
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3">
+          <div className="form-group">
             <Form.Label>Email</Form.Label>
             <Form.Control
               name="email"
@@ -91,13 +97,13 @@ export default function AddHrPage() {
               onChange={handleChange}
               required
               placeholder="Enter email"
+              className="form-input"
             />
-          </Form.Group>
+          </div>
 
-          {/* Password */}
-          <Form.Group className="mb-3">
+          <div className="form-group">
             <Form.Label>Password</Form.Label>
-            <InputGroup>
+            <div className="password-wrapper">
               <Form.Control
                 name="password"
                 type={showPassword ? "text" : "password"}
@@ -105,17 +111,20 @@ export default function AddHrPage() {
                 onChange={handleChange}
                 required
                 placeholder="Enter password"
+                className="form-input"
               />
-              <Button variant="outline-light" onClick={() => setShowPassword(!showPassword)}>
+              <span
+                className="toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+              >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </Button>
-            </InputGroup>
-          </Form.Group>
+              </span>
+            </div>
+          </div>
 
-          {/* Confirm Password */}
-          <Form.Group className="mb-3">
+          <div className="form-group">
             <Form.Label>Confirm Password</Form.Label>
-            <InputGroup>
+            <div className="password-wrapper">
               <Form.Control
                 name="confirmPassword"
                 type={showConfirm ? "text" : "password"}
@@ -123,36 +132,39 @@ export default function AddHrPage() {
                 onChange={handleChange}
                 required
                 placeholder="Confirm password"
+                className="form-input"
               />
-              <Button variant="outline-light" onClick={() => setShowConfirm(!showConfirm)}>
+              <span
+                className="toggle-password"
+                onClick={() => setShowConfirm(!showConfirm)}
+              >
                 {showConfirm ? <FaEyeSlash /> : <FaEye />}
-              </Button>
-            </InputGroup>
-          </Form.Group>
+              </span>
+            </div>
+          </div>
 
-          <Form.Group className="mb-3">
+          <div className="form-group">
             <Form.Label>Profile Picture</Form.Label>
             <Form.Control
               name="profile_picture"
               type="file"
               accept="image/*"
               onChange={handleChange}
+              className="form-input"
             />
-          </Form.Group>
+          </div>
 
           {preview && <img src={preview} alt="Preview" className="hr-img-preview" />}
-          {formError && <p className="text-danger mt-2">{formError}</p>}
-
-          <Button
+          
+          <button
             type="submit"
-            variant="primary"
-            className="hr-btn"
+            className="form-button"
             disabled={loading}
           >
             {loading ? <Spinner size="sm" animation="border" /> : "Add HR"}
-          </Button>
+          </button>
         </Form>
-      </Card>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\GeneralSetting;
@@ -14,11 +13,11 @@ class GeneralSettingController extends Controller
 {
     public function index()
     {
-        $settings = GeneralSetting::first();
+        $settings = GeneralSetting::all(); // Changed from first() to all()
 
         return response()->json([
             'success' => true,
-            'message' => $settings ? 'General settings retrieved successfully.' : 'No general settings found.',
+            'message' => $settings->isEmpty() ? 'No general settings found.' : 'General settings retrieved successfully.',
             'data' => $settings
         ]);
     }
@@ -35,7 +34,7 @@ class GeneralSettingController extends Controller
             'weekend_days.*' => 'string',
         ]);
 
-        // ترميز weekend_days إلى JSON قبل الحفظ
+        // Encode weekend_days to JSON before saving
         if (isset($validated['weekend_days'])) {
             $validated['weekend_days'] = json_encode($validated['weekend_days']);
         }
@@ -50,7 +49,7 @@ class GeneralSettingController extends Controller
             $setting = GeneralSetting::create($validated);
         }
 
-        // إعادة حساب الرواتب لكل أشهر الحضور
+        // Recalculate payroll for all attendance months
         try {
             $payrollController = new PayrollController();
             $attendanceMonths = Attendence::where('employee_id', $validated['employee_id'])

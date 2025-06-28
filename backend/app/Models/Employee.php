@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class Employee extends Model
 {
     use HasFactory;
+    use Notifiable;
 
     protected $fillable = [
         'first_name', 'last_name', 'email', 'phone', 'address', 'salary',
@@ -31,7 +33,8 @@ class Employee extends Model
 
     protected $hidden = []; // Ensure no fields are hidden
 
-    protected $appends = ['general_setting_data'];
+protected $appends = ['general_setting_data', 'full_name'];
+
 
     // Relations
     public function department()

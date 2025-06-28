@@ -4,62 +4,209 @@
   align-items: center;
   padding: 2rem;
   min-height: 100vh;
-  background-color: #f5f7fa; /* خلفية الصفحة فاتحة */
+  background-color: #fafafa;
+  font-family: 'Inter', sans-serif;
+  color: #333;
 }
 
 .hr-glass-card {
-  background: #ffffff; /* خلفية بيضاء للفورم */
-  border-radius: 60px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  color: #333;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(172, 112, 198, 0.2);
+  border-top: 4px solid #9b59b6;
   width: 100%;
   max-width: 500px;
   padding: 2rem;
 }
 
-.hr-form-title {
-  color: var(--bs-primary);
-  font-weight: 600;
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
-  text-align: center;
 }
 
-.form-control {
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  padding: 0.6rem 1rem;
+.header-title h3 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #ac70c6;
+}
+
+.header-icon {
+  font-size: 1.6rem;
+  color: #ac70c6;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.4rem;
   color: #333;
-  background-color: #fff;
+  font-size: 0.9rem;
 }
 
-.form-control:focus {
-  border-color: var(--bs-primary);
-  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.2);
+.form-input {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ccc;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  color: #333;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #6b48a3;
+  box-shadow: 0 0 4px rgba(107, 72, 163, 0.3);
 }
 
 input[type="file"]::file-selector-button {
-  background-color: var(--bs-primary);
+  background-color: #6b48a3;
   color: #fff;
   border: none;
   border-radius: 8px;
   padding: 0.4rem 1rem;
   cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.form-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #6b48a3;
+  background: #6b48a3 !important;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.85rem;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.form-button:hover {
+  background: #8b5db4;
+  border-color: #8b5db4;
+}
+
+.form-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-error {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 0.8rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6b48a3;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+  color: #8b5db4;
 }
 
 .hr-img-preview {
-  height: 80px;
-  width: 80px;
+  height: 100px;
+  width: 100px;
   object-fit: cover;
   border-radius: 50%;
-  border: 2px solid var(--bs-primary);
+  border: 2px solid #6b48a3;
   display: block;
-  margin: 0 auto 1rem;
+  margin: 1rem auto;
 }
 
-.hr-btn {
-  width: 100%;
-  padding: 0.6rem;
-  border-radius: 10px;
-  font-weight: 500;
+/* Responsive Styling */
+@media (max-width: 768px) {
+  .hr-page-wrapper {
+    padding: 0.75rem;
+  }
+
+  .hr-glass-card {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .form-input,
+  .form-button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .toggle-password {
+    font-size: 0.9rem;
+  }
+
+  .hr-img-preview {
+    height: 80px;
+    width: 80px;
+  }
+
+  .header-title h3 {
+    font-size: 1.4rem;
+  }
+
+  .header-icon {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hr-glass-card {
+    padding: 1rem;
+  }
+
+  .form-input,
+  .form-button {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .toggle-password {
+    font-size: 0.8rem;
+  }
+
+  .hr-img-preview {
+    height: 60px;
+    width: 60px;
+  }
+
+  .header-title h3 {
+    font-size: 1.2rem;
+  }
+
+  .header-icon {
+    font-size: 1.2rem;
+  }
+
+  .form-error {
+    font-size: 0.75rem;
+  }
 }

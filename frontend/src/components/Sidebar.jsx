@@ -1,30 +1,49 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   FaCalendarAlt,
-  FaPlus,
   FaHome,
   FaUsers,
   FaMoneyBill,
-  FaChevronDown,
-  FaChevronUp,
   FaBuilding,
   FaCog,
   FaSignOutAlt,
   FaUserPlus,
+  FaBars,
+  FaTimes,
+  FaClock,
 } from "react-icons/fa";
 import api from "../api";
 import "./Sidebar.css";
 
 export default function Sidebar() {
   const [hr, setHr] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   const linkStyle = ({ isActive }) =>
-    isActive ? "nav-link full-button active" : "nav-link full-button";
+    isActive ? "hrsb-nav-link active" : "hrsb-nav-link";
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/hr/logout");
+      localStorage.removeItem("token");
+
+      // Prevent navigating back after logout
+      window.history.pushState(null, "", window.location.href);
+      window.onpopstate = function () {
+        window.history.go(1);
+      };
+
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   useEffect(() => {
@@ -35,72 +54,62 @@ export default function Sidebar() {
   }, []);
 
   return (
-    <div className="d-flex vh-100 overflow-hidden">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div>
-          <h4>HR System</h4>
-
-          <div className="sidebar-menu">
-            <NavLink to="/" className={linkStyle}>
-              <FaHome />
-              Home
-            </NavLink>
-
-            <NavLink to="/holidays" className={linkStyle}>
-              <FaCalendarAlt />
-              Holidays
-            </NavLink>
-
-            <NavLink to="/employees" className={linkStyle}>
-              <FaUsers />
-              Employees
-            </NavLink>
-
-         
-            
-            <NavLink to="/payroll" className={linkStyle}>
-              <FaMoneyBill />
-              Payroll
-            </NavLink>
-
-            <NavLink to="/departments" className={linkStyle}>
-              <FaBuilding />
-              Departments
-            </NavLink>
-            <NavLink to="/Attendance" className={linkStyle}>
-              <FaBuilding />
-              Attendance
-            </NavLink>
-
-
-            <NavLink to="/settings/general" className={linkStyle}>
-              <FaCog />
-              Settings
-            </NavLink>
-
-            <NavLink to="/addHr" className={linkStyle}>
-              <FaUserPlus />
-              Add HR
-            </NavLink>
-
-            <button onClick={handleLogout} className="nav-link full-button">
-              <FaSignOutAlt />
-              Logout
-            </button>
-          </div>
+    <div className="hrsb-wrapper">
+      <aside className={`hrsb-sidebar ${isSidebarOpen ? "hrsb-sidebar-open" : ""}`}>
+        <div className="hrsb-sidebar-header">
+          <h4 className="hrsb-title">HR System</h4>
+          <button className="hrsb-toggle-button" onClick={toggleSidebar}>
+            {isSidebarOpen ? <FaTimes /> : <FaBars />}
+          </button>
         </div>
 
-        {/* HR Info */}
+        <div className="hrsb-menu">
+          <NavLink to="/dashboard" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+            <FaHome />
+            Home
+          </NavLink>
+          <NavLink to="/holidays" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+            <FaCalendarAlt />
+            Holidays
+          </NavLink>
+          <NavLink to="/employees" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+            <FaUsers />
+            Employees
+          </NavLink>
+          <NavLink to="/payroll" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+            <FaMoneyBill />
+            Payroll
+          </NavLink>
+          <NavLink to="/departments" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+            <FaBuilding />
+            Departments
+          </NavLink>
+          <NavLink to="/attendance" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+            <FaClock />
+            Attendance
+          </NavLink>
+          <NavLink to="/settings/general" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+            <FaCog />
+            Settings
+          </NavLink>
+          <NavLink to="/addHr" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+            <FaUserPlus />
+            Add HR
+          </NavLink>
+
+          {/* Logout button */}
+          <button className="hrsb-nav-link" onClick={handleLogout}>
+            <FaSignOutAlt />
+            Logout
+          </button>
+        </div>
+
+        {/* HR profile info */}
         {hr && (
           <NavLink
             to="/updateHr"
-            className="sidebar-user d-flex align-items-center gap-3 mt-4 text-decoration-none"
-            style={{
-              padding: "12px",
-              background: "rgba(255,255,255,0.08)",
-              borderRadius: "12px",
-            }}
+            className="hrsb-user-info d-flex align-items-center gap-3 text-decoration-none"
+            onClick={() => setIsSidebarOpen(false)}
           >
             <img
               src={
@@ -109,30 +118,23 @@ export default function Sidebar() {
                   : "https://via.placeholder.com/100"
               }
               alt="HR"
-              style={{
-                width: "50px",
-                height: "50px",
-                objectFit: "cover",
-                borderRadius: "50%",
-                border: "2px solid white",
-              }}
+              className="hrsb-user-avatar"
             />
-            <span
-              style={{
-                color: "white",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                textShadow: "0 0 5px rgba(0,0,0,0.3)",
-              }}
-            >
-              {hr.name}
-            </span>
+            <span className="hrsb-user-name">{hr.name}</span>
           </NavLink>
         )}
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-grow-1 p-4 bg-light" style={{ overflowY: "auto" }}>
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div className="hrsb-overlay" onClick={toggleSidebar}></div>
+      )}
+
+      {/* Main content */}
+      <main className="hrsb-main-content">
+        <button className="hrsb-mobile-toggle" onClick={toggleSidebar}>
+          <FaBars />
+        </button>
         <Outlet />
       </main>
     </div>

@@ -11,13 +11,17 @@ use App\Http\Controllers\{
     HolidayController,
     DepartmentController
 };
+use App\Http\Controllers\Auth\PasswordResetController;
+
+Route::post('/hr/forgot-password', [PasswordResetController::class, 'sendResetLink']);
+Route::post('/hr/reset-password', [PasswordResetController::class, 'reset']);
 
 // ==================
 // Public routes
 // ==================
 
 Route::post('/hr/login', [HRController::class, 'login']);
-   
+        Route::post('/hr/AddHr', [HRController::class, 'AddHr']);
 
 // ==================
 // Protected routes
@@ -31,9 +35,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // HR
 
-    Route::put('/hr/update', [HRController::class, 'update']);
+
+ Route::post('/hr/update/{id}', [HRController::class, 'update']);
+
+
+
     Route::post('/hr/logout', [HRController::class, 'logout']);
-     Route::post('/hr/AddHr', [HRController::class, 'AddHr']);
+
     Route::get('/dashboard', fn() => response()->json(['message' => 'Welcome HR']));
 
     // Employees
@@ -53,6 +61,9 @@ Route::post('/attendances/check-out', [AttendenceController::class, 'checkOut'])
         Route::get('/all-employees-data', [PayrollController::class, 'allEmployeesData']);
         Route::post('/recalculate', [PayrollController::class, 'recalculate']);
         Route::get('/all', [PayrollController::class, 'allPayrolls']); 
+Route::get('/current-month', [PayrollController::class, 'getCurrentMonth']);
+Route::get('/all-months', [PayrollController::class, 'getAllMonths']);
+
     });
     Route::get('/payroll/verify/{employee_id}/{month}', [PayrollController::class, 'verifyPayrollApi']);
 

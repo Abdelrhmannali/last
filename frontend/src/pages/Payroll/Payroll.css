@@ -1,257 +1,402 @@
-/* Glass Card */
-.glass-card {
-  background: rgba(255, 255, 255, 0.06); /* نفس خلفية أزرار الـ sidebar */
-  backdrop-filter: blur(6px); /* موحد مع الـ sidebar */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* حدود مشابهة */
-  border-radius: 12px; /* نفس الـ border-radius في الـ sidebar */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* انتقال سلس زي الـ sidebar */
-  min-height: 80px;
+.payroll-page-wrapper {
+  padding: 1.5rem;
+  background-color: #fafafa;
+  min-height: 100vh;
+  color: #333;
+  font-family: 'Inter', sans-serif;
+}
+
+
+
+.header-title h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #ac70c6;
+}
+
+.header-icon {
+  font-size: 1.6rem;
+  color: #ac70c6;
+}
+.payroll-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.payroll-header-title {
+ display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.payroll-header-title h2 {
+ font-size: 1.6rem;
+  font-weight: 600;
+  color: #ac70c6;
+}
+
+.payroll-header-icon {
+  font-size: 1.6rem;
+  color: #ac70c6;
+}
+
+.payroll-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+
+.payroll-form-input {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ccc;
+  background: rgba(255, 255, 255, 0.9);
+
+  border-radius: 8px;
+  color: #333;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.payroll-form-input:focus {
+  outline: none;
+  border-color: #6b48a3;
+  box-shadow: 0 0 4px rgba(107, 72, 163, 0.3);
+}
+
+.payroll-form-button {
+   display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #6b48a3 !important;
+  background: #6b48a3 !important;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.payroll-form-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payroll-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+}
+
+.payroll-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid #6b48a3;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.payroll-no-data {
+  text-align: center;
+  padding: 1.5rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.payroll-stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.payroll-stat-card {
+  background: rgba(255, 255, 255, 0.9);
+
+  border: 1px solid #ccc;
+  border-radius: 22px;
+  padding: 0.8rem;
+  width: 300px;
+  height: 200px;
+  text-align: center;
+  transition: all 0.3s ease;
+ box-shadow: 0 4px 10px rgba(172, 112, 198, 0.2);
+  border-top: 4px solid #9b59b6;
+  min-width: 18rem;
+}
+
+.payroll-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.payroll-stat-card p {
+  font-size: 1.1rem;
+  color: #6b48a3;
+  margin-bottom: 0.4rem;
+}
+
+.payroll-stat-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #6b48a3;
+}
+
+.payroll-stat-card .payroll-stat-subtext {
+  font-size: 1.1rem;
+  color: #6b48a3;
+}
+
+.payroll-chart-card {
+  height: 200px !important;
+}
+
+.payroll-chart-card h3 {
+  font-size: 1.1rem;
+  color: #6b48a3;
+  margin-bottom: 0.15rem;
+}
+
+.payroll-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.payroll-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.9);
+
+  border: 1px solid #ccc;
+  border-radius: 22px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.payroll-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.payroll-content {
   text-align: center;
   padding: 0.8rem;
 }
 
-.glass-card:hover {
-  transform: translateY(-2px); /* نفس تأثير hover في الـ sidebar */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* ظل مشابه */
-  background: rgba(255, 255, 255, 0.12); /* نفس تأثير الـ sidebar buttons */
-}
-
-/* Employee Profile Avatar */
-.employee-profile-avatar {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 2px solid var(--bs-primary); /* لون موحد مع الـ sidebar */
-  box-shadow: 0 0 4px rgba(13, 110, 253, 0.2); /* ظل بلون الـ primary */
-  margin-bottom: 0.5rem;
-}
-
-/* Text clarity improvements */
-.glass-card h6 {
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  margin-bottom: 0.5rem;
-  color: #333; /* نفس لون النصوص في الـ holiday page */
-}
-
-.glass-card p {
-  font-size: 0.9rem !important;
-  font-weight: 500 !important;
-  margin-bottom: 0;
-  color: #1a1a1a; /* نفس لون النصوص */
-}
-
-/* Preserve original text colors */
-.glass-card p.text-success {
-  color: #28a745; /* لون قياسي موحد */
-}
-
-.glass-card p.text-danger {
-  color: #dc3545; /* لون قياسي موحد */
-}
-
-.glass-card p.text-info {
-  color: #17a2b8; /* لون قياسي موحد */
-}
-
-.glass-card p.text-primary {
-  color: var(--bs-primary); /* موحد مع الـ sidebar */
-}
-
-/* Modal Dialog */
-.compact-modal .modal-dialog {
-  max-width: 95vw;
-  width: 100%;
-  margin: 1vh auto;
-  min-height: auto;
-  max-height: 95vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Modal Content */
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  background: rgba(255, 255, 255, 0.2); /* خلفية زجاجية زي الـ sidebar */
-  backdrop-filter: blur(6px); /* موحد */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px; /* نفس الـ border-radius */
-  overflow: hidden;
-  min-height: auto;
-  max-height: 95vh;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* ظل مشابه */
-}
-
-/* Modal Body */
-.modal-body {
-  flex: 1 1 auto;
-  padding: 0.6rem;
-  background: #ffffff;
-  overflow: hidden;
-}
-
-/* Modal Header */
-.modal-header {
-  background: var(--bs-primary); /* لون موحد مع الـ sidebar */
-  border-bottom: none;
-  padding: 0.6rem 0.8rem;
-  color: white;
-  flex-shrink: 0;
-}
-
-.modal-header .btn-close {
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
-  transition: transform 0.2s ease;
-}
-
-.modal-header .btn-close:hover {
-  transform: rotate(90deg);
-}
-
-/* Section Divider */
-.section-divider {
-  border-top: 1px solid rgba(13, 110, 253, 0.2); /* لون موحد مع الـ primary */
-  margin: 0.4rem 0;
-}
-
-/* Slide-in Animation */
-.slide-in {
-  animation: slideIn 0.3s ease-out forwards; /* موحد مع الـ holiday page */
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.slide-in:nth-child(1) { animation-delay: 0.1s; }
-.slide-in:nth-child(2) { animation-delay: 0.2s; }
-.slide-in:nth-child(3) { animation-delay: 0.3s; }
-.slide-in:nth-child(4) { animation-delay: 0.4s; }
-.slide-in:nth-child(5) { animation-delay: 0.5s; }
-.slide-in:nth-child(6) { animation-delay: 0.6s; }
-.slide-in:nth-child(7) { animation-delay: 0.7s; }
-
-/* Search Input */
-.search-input {
-  max-width: 250px;
-  border-color: var(--bs-primary); /* لون موحد */
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
-}
-
-/* Employee Avatar */
-.employee-avatar {
-  border-radius: 50%;
-  border: 1px solid var(--bs-primary); /* لون موحد */
-  box-shadow: 0 0 2px rgba(13, 110, 253, 0.2); /* ظل موحد */
-  width: 24px;
-  height: 24px;
-}
-
-/* Table Text Ellipsis */
-.text-ellipsis {
-  max-width: 100px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Table No Wrap */
-.table-nowrap {
-  white-space: nowrap;
-}
-
-/* Optimize row spacing */
-.row.g-1 {
+.payroll-content h4 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #6b48a3;
   margin-bottom: 0.4rem;
 }
 
-/* Responsive adjustments */
-@media (max-width: 576px) {
-  .compact-modal .modal-dialog {
-    max-width: 98vw;
-    margin: 0.5vh auto;
-    max-height: 95vh;
+.payroll-content p {
+  font-size: 0.85rem;
+  color: #6b48a3;
+  margin-bottom: 0.4rem;
+}
+
+.payroll-actions {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.payroll-action-button {
+  padding: 0.08rem 0.2rem;
+  border: 1px solid #6b48a3;
+  background: transparent;
+  border-radius: 16px;
+  color: #6b48a3;
+  font-size: 0.55rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.payroll-action-button.payroll-edit {
+  background: #6b48a3;
+  color: #fff;
+}
+
+.payroll-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payroll-employee-avatar {
+  border: 2px solid #6b48a3;
+  transition: transform 0.3s ease;
+}
+
+.payroll-card:hover .payroll-employee-avatar {
+  transform: scale(1.05);
+}
+
+.payroll-badge {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.payroll-badge.payroll-bonus {
+  background: #ac70c6;
+}
+
+.payroll-badge.payroll-deduction {
+  background: #ff6b6b;
+}
+
+.payroll-badge.payroll-salary {
+  background: #6b48a3;
+}
+
+.payroll-badge.payroll-net-salary {
+  background: #c495d8;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+  .payroll-page-wrapper {
+    padding: 0.75rem;
   }
 
-  .glass-card {
-    min-height: 60px;
-    padding: 0.6rem;
-    border-radius: 8px; /* تقليل الـ border-radius للشاشات الصغيرة */
+  .payroll-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
 
-  .glass-card h6 {
-    font-size: 0.85rem !important;
+  .payroll-form {
+    flex-direction: column;
   }
 
-  .glass-card p {
-    font-size: 0.75rem !important;
+  .payroll-form-input,
+  .payroll-form-button {
+    width: 100%;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
   }
 
-  .employee-profile-avatar {
-    width: 60px;
-    height: 60px;
+  .payroll-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
   }
 
-  .modal-body {
-    padding: 0.5rem;
+  .payroll-card {
+    width: 140px;
+    height: 140px;
   }
 
-  .modal-header {
-    padding: 0.5rem 0.6rem;
+  .payroll-content h4 {
+    font-size: 0.95rem;
   }
 
-  .search-input {
-    max-width: 200px;
-    font-size: 0.75rem;
+  .payroll-content p {
+    font-size: 0.7rem;
   }
 
-  .table-nowrap {
-    font-size: 0.75rem;
+  .payroll-action-button {
+    font-size: 0.5rem;
+    padding: 0.05rem 0.15rem;
+  }
+
+  .payroll-stats-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .payroll-stat-card {
+    width: 100%;
+    height: 160px;
+  }
+
+  .payroll-chart-card {
+    height: 180px !important;
+  }
+
+  .payroll-stat-card p {
+    font-size: 0.9rem;
+  }
+
+  .payroll-stat-card h3 {
+    font-size: 1.4rem;
+  }
+
+  .payroll-stat-card .payroll-stat-subtext {
+    font-size: 0.8rem;
+  }
+
+  .payroll-badge {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
   }
 }
 
-@media (max-height: 500px) {
-  .compact-modal .modal-dialog {
-    max-height: 98vh;
+@media (max-width: 480px) {
+  .payroll-card {
+    width: 120px;
+    height: 120px;
   }
 
-  .glass-card {
-    min-height: 50px;
-    padding: 0.5rem;
-    border-radius: 8px;
+  .payroll-content h4 {
+    font-size: 0.85rem;
   }
 
-  .glass-card h6 {
-    font-size: 0.75rem !important;
+  .payroll-content p {
+    font-size: 0.65rem;
   }
 
-  .glass-card p {
-    font-size: 0.65rem !important;
+  .payroll-action-button {
+    font-size: 0.45rem;
+    padding: 0.04rem 0.1rem;
   }
 
-  .modal-body {
-    padding: 0.4rem;
+  .payroll-stat-card {
+    width: 100%;
+    height: 140px;
   }
 
-  .section-divider {
-    margin: 0.3rem 0;
+  .payroll-chart-card {
+    height: 160px !important;
   }
 
-  .employee-profile-avatar {
-    width: 50px;
-    height: 50px;
+  .payroll-stat-card p {
+    font-size: 0.8rem;
+  }
+
+  .payroll-stat-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .payroll-stat-card .payroll-stat-subtext {
+    font-size: 0.7rem;
+  }
+
+  .payroll-badge {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.65rem;
   }
 }

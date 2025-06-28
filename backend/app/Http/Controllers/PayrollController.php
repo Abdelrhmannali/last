@@ -244,6 +244,30 @@ $businessDays = collect($period)->filter(function ($date) use ($weekend_days, $o
             throw $e;
         }
     }
+    public function getCurrentMonth()
+    {
+        $currentMonth = Carbon::now()->format('Y-m');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'current_month' => $currentMonth
+            ]
+        ]);
+    }
+
+    public function getAllMonths()
+    {
+        $months = Payroll::distinct()
+            ->pluck('month')
+            ->sort()
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $months
+        ]);
+    }
 
     private function calculateDeduction($totalLate, $deduction_type, $deduction_value, $salaryPerHour)
     {
@@ -265,4 +289,5 @@ $businessDays = collect($period)->filter(function ($date) use ($weekend_days, $o
     {
         return bcadd($value, '0', 2);
     }
+    
 }
