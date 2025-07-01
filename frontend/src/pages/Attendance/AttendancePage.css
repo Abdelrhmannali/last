@@ -3,7 +3,7 @@
 }
 
 .att-page-wrapper {
-  padding: clamp(1rem, 3vw, 1.5rem);
+padding: clamp(1rem, 3vw, 1.5rem);
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f5f5 0%, #e6e6fa 100%);
   font-family: 'Inter', sans-serif;
@@ -258,8 +258,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
-  margin-bottom: 2rem
-
+  margin-bottom: 2rem;
 }
 
 .att-table-container {
@@ -297,7 +296,7 @@
 }
 
 .att-table-success {
-  background: rgba(40, 167, 69, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .att-table-danger {
@@ -322,6 +321,15 @@
   vertical-align: middle;
   width: clamp(30px, 8vw, 40px);
   height: clamp(30px, 8vw, 40px);
+  object-fit: cover;
+}
+
+.att-modal .att-employee-avatar {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 15px;
 }
 
 .att-action-buttons {
@@ -553,6 +561,11 @@
     height: clamp(25px, 8vw, 30px);
   }
 
+  .att-modal .att-employee-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
   .att-modal-header h4 {
     font-size: clamp(1rem, 2.5vw, 1.2rem);
   }
@@ -586,4 +599,34 @@
   .att-stat-value {
     font-size: 1.2rem;
   }
+}
+
+
+
+
+
+
+.att-input-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.att-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b48a3;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  transition: color 0.3s;
+}
+
+.att-icon-button:hover {
+  color: #ff6b6b;
+}
+
+.att-icon-button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
 }

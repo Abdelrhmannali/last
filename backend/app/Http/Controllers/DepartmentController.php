@@ -1,74 +1,115 @@
 <?php
-
+ 
 namespace App\Http\Controllers;
-
+ 
 use App\Models\Department;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
+use App\Http\Requests\StoreDepartmentRequest;
+
+use App\Http\Requests\UpdateDepartmentRequest;
+ 
 class DepartmentController extends Controller
+
 {
-    
+
     public function index()
+
     {
+
         $departments = Department::all();
-
+ 
         return response()->json($departments, 200);
+
     }
+ 
+    public function store(StoreDepartmentRequest $request)
 
-   
-    public function store(Request $request)
     {
-        $validated = $request->validate([
-            'dept_name' => 'required|string|max:255',
-        ]);
 
-        $department = Department::create($validated);
-
+        $department = Department::create($request->validated());
+ 
         return response()->json([
+
             'message' => 'Department created successfully.',
+
             'data' => $department
+
         ], 201);
-    }
 
+    }
+ 
     public function show(Department $department)
-    {
-        return response()->json($department, 200);
-    }
 
-    
-    public function update(Request $request, Department $department)
     {
-        $validated = $request->validate([
-            'dept_name' => 'required|string|max:255',
-        ]);
-
-        $department->update($validated);
 
         return response()->json([
-            'message' => 'Department updated successfully.',
+
+            'message' => 'Department retrieved successfully.',
+
             'data' => $department
-        ], 200);
-    }
 
-    
-    public function destroy(Department $department)
+        ], 200);
+
+    }
+ 
+    public function update(UpdateDepartmentRequest $request, Department $department)
+
     {
-        $department->delete();
 
+        $department->update($request->validated());
+ 
         return response()->json([
-            'message' => 'Department deleted successfully.'
+
+            'message' => 'Department updated successfully.',
+
+            'data' => $department
+
         ], 200);
+
+    }
+ 
+    public function destroy(Department $department)
+
+    {
+
+        if ($department->employees()->exists()) {
+
+            return response()->json([
+
+                'success' => false,
+
+                'message' => 'Cannot delete department with assigned employees.'
+
+            ], 400);
+
+        }
+ 
+        $department->delete();
+ 
+        return response()->json([
+
+            'success' => true,
+
+            'message' => 'Department deleted successfully.'
+
+        ], 200);
+
+    }
+ 
+    public function departmentsWithEmployees()
+
+    {
+
+        $departments = Department::with('employees')->get();
+ 
+        return response()->json([
+
+            'data' => $departments
+
+        ], 200);
+
     }
 
-public function departmentsWithEmployees()
-{
-    $departments = Department::with('employees')->get();
-
-    return response()->json([
-        'data' => $departments
-    ], 200);
 }
 
-
-}
+ 

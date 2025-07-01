@@ -25,6 +25,19 @@
   transition: transform 0.3s ease;
   position: static;
   z-index: 1000;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ac70c6 #222;
+}
+
+.hrsb-sidebar::-webkit-scrollbar {
+  width: 7px;
+  background: #222;
+}
+
+.hrsb-sidebar::-webkit-scrollbar-thumb {
+  background: #ac70c6;
+  border-radius: 8px;
 }
 
 .hrsb-sidebar-header {
@@ -57,7 +70,7 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(6px);
+
   color: white;
   font-weight: 500;
   font-size: clamp(0.85rem, 2.5vw, 0.95rem);
@@ -164,6 +177,9 @@
     left: 0;
     height: 100%;
     transform: translateX(-100%);
+    max-height: 100vh;
+    min-height: 0;
+    overflow-y: auto; /* يسمح بالتمرير الرأسي دائماً */
   }
 
   .hrsb-sidebar.hrsb-sidebar-open {
@@ -191,6 +207,9 @@
   .hrsb-sidebar {
     width: clamp(180px, 25vw, 220px);
     max-width: 220px;
+    max-height: 100vh;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .hrsb-nav-link {
@@ -226,6 +245,9 @@
     width: clamp(160px, 20vw, 180px);
     max-width: 180px;
     padding: clamp(0.75rem, 2vw, 1rem);
+    max-height: 100vh;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .hrsb-nav-link {

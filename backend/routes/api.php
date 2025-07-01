@@ -49,10 +49,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('employees', EmployeeController::class);
 
     // Attendance
-    Route::apiResource('attendances', AttendenceController::class);
-    Route::post('/attendances/check-in', [AttendenceController::class, 'checkIn']);
-Route::post('/attendances/check-out', [AttendenceController::class, 'checkOut']);
+Route::get('/attendances', [AttendenceController::class, 'index']);
+Route::post('/attendances', [AttendenceController::class, 'store']);
+Route::get('/attendances/{attendance}', [AttendenceController::class, 'show']);
+Route::put('/attendances/{attendance}', [AttendenceController::class, 'update']);
+Route::delete('/attendances/{id}', [AttendenceController::class, 'destroy']);
 
+Route::post('/attendances/check-in', [AttendenceController::class, 'checkIn']);
+Route::post('/attendances/check-out', [AttendenceController::class, 'checkOut']);
 
     // Payroll
     Route::prefix('payroll')->group(function () {

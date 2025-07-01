@@ -3,8 +3,7 @@ import { Form, Button, Spinner, Alert } from "react-bootstrap";
 import { FaUserEdit } from "react-icons/fa";
 import api from "../../api";
 import "./HRForm.css";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
 
 export default function UpdateHrPage() {
   const [form, setForm] = useState({
@@ -38,7 +37,7 @@ export default function UpdateHrPage() {
       .catch((err) => {
         console.error("Error fetching user data:", err);
         setMessage("❌ Failed to load user data.");
-        toast.error("Failed to load user data!", { position: "top-right", autoClose: 3000 });
+       
       });
   }, []);
 
@@ -68,21 +67,21 @@ export default function UpdateHrPage() {
 
     if ([...formData.entries()].length === 0) {
       setMessage("❌ Please update at least one field.");
-      toast.error("Please update at least one field!", { position: "top-right", autoClose: 3000 });
+     
       setLoading(false);
       return;
     }
 
     try {
-      const response = await api.put(`/hr/update/${hrId}`, formData);
+      const response = await api.post(`/hr/update/${hrId}`, formData);
       console.log("Response:", response.data);
       setMessage("✅ HR updated successfully.");
-      toast.success("HR updated successfully!", { position: "top-right", autoClose: 3000 });
+   
     } catch (err) {
       console.error("Error:", err.response?.data || err.message);
       const errorMsg = err.response?.data?.message || "Update failed";
       setMessage("❌ Error: " + errorMsg);
-      toast.error(errorMsg, { position: "top-right", autoClose: 3000 });
+    
     }
 
     setLoading(false);
@@ -90,7 +89,7 @@ export default function UpdateHrPage() {
 
   return (
     <div className="hr-page-wrapper">
-      <ToastContainer />
+     
       <div className="hr-glass-card p-4">
         <div className="header-title">
           <FaUserEdit className="header-icon" />

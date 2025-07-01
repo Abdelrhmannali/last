@@ -16,15 +16,20 @@ export default function Employees() {
   const page = parseInt(searchParams.get("page")) || 1;
   const searchInputRef = useRef(null);
   const queryClient = useQueryClient();
+  const [searchText, setSearchText] = useState("");
 
+  const search = searchParams.get("query") || "";
   const {
     data: employeeData,
     isLoading,
     isError,
     isFetching,
   } = useQuery({
-    queryKey: ["employees", page],
-    queryFn: () => api.get(`/employees?page=${page}`).then((res) => res.data),
+    queryKey: ["employees", page, search],
+    queryFn: () =>
+      api
+        .get(`/employees?page=${page}${search ? `&search=${search}` : ""}`)
+        .then((res) => res.data),
     keepPreviousData: true,
   });
 
@@ -64,20 +69,11 @@ export default function Employees() {
     e.preventDefault();
     const query = searchInputRef.current?.value.trim().toLowerCase();
     if (!query) return;
-
-    api
-      .get(`/employees/search?query=${query}`)
-      .then((res) => {
-        const results = Array.isArray(res.data?.data)
-          ? res.data.data
-          : res.data;
-        setEmployees(results);
-      })
-      .catch(() => alert("Error while searching"));
+    setSearchParams({ page: 1, query }); // أضف الكلمة للـ URL
   };
 
   const handleReset = () => {
-    setEmployees([]);
+    setSearchText("");
     if (searchInputRef.current) searchInputRef.current.value = "";
   };
 
@@ -93,7 +89,9 @@ export default function Employees() {
     return createdAt >= startOfToday && createdAt < endOfToday;
   }).length;
 
-  const list = employees.length > 0 ? employees : employeeData?.data || [];
+  const list = (employeeData?.data || []).filter(emp =>
+    `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   return (
     <div className="employee-page-wrapper">
@@ -115,6 +113,8 @@ export default function Employees() {
                 className="employee-form-input form-control me-2 border-2"
                 type="search"
                 placeholder="Search by name..."
+                value={searchText}
+                onChange={e => setSearchText(e.target.value)}
               />
               <button className="employee-form-button" type="submit">
                 Search

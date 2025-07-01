@@ -84,6 +84,7 @@ class PayrollController extends Controller
         $data = $payrolls->map(function ($payroll) {
             return [
                 'employee_full_name' => "{$payroll->employee->first_name} {$payroll->employee->last_name}",
+                'dep_name' => optional($payroll->employee->department)->dept_name, // أضف هذا السطر
                 'month' => $payroll->month,
                 'salary' => $payroll->employee->salary,
                 'month_days' => $payroll->month_days,
@@ -132,118 +133,128 @@ class PayrollController extends Controller
     }
 
     public function recalculate(Request $request)
-    {
-        $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'month' => 'required|date_format:Y-m',
+{
+    $request->validate([
+        'employee_id' => 'required|exists:employees,id',
+        'month' => 'required|date_format:Y-m',
+    ]);
+
+    $employee = Employee::with('generalSetting')->find($request->employee_id);
+    $generalSettings = $employee->generalSetting;
+
+    if (!$generalSettings) {
+        Log::warning("No general settings found for employee {$employee->id}");
+        return response()->json([
+            'success' => false,
+            'message' => 'Employee settings not found.'
+        ], 400);
+    }
+
+    try {
+        $existingPayroll = Payroll::where('employee_id', $employee->id)
+            ->where('month', $request->month)
+            ->first();
+
+        $monthStart = Carbon::createFromFormat('Y-m', $request->month)->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $weekend_days = $generalSettings->weekend_days ?? ['Saturday', 'Sunday'];
+
+        if (!is_array($weekend_days)) {
+            Log::warning("Invalid weekend_days format for employee {$employee->id}", [
+                'value' => $generalSettings->weekend_days,
+            ]);
+            $weekend_days = ['Saturday', 'Sunday'];
+        }
+
+        $officialHolidays = Holiday::whereBetween('date', [$monthStart, $monthEnd])
+            ->pluck('date')
+            ->map(fn($d) => Carbon::parse($d)->toDateString())
+            ->toArray();
+
+        $period = CarbonPeriod::create($monthStart->copy(), $monthEnd->copy());
+
+        $businessDays = collect($period)->filter(function ($date) use ($weekend_days, $officialHolidays) {
+            return !in_array($date->format('l'), $weekend_days) && !in_array($date->toDateString(), $officialHolidays);
+        })->count();
+
+        $weekendCount = collect($period)->filter(fn($d) => in_array($d->format('l'), $weekend_days))->count();
+        $holidayCount = count($officialHolidays);
+
+        $attendances = Attendence::where('employee_id', $employee->id)
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->get();
+
+        $attendedDays = $attendances->unique('date')->count();
+        $absentDays = max(0, $businessDays - $attendedDays);
+        $totalLate = $attendances->sum(fn($a) => max(0, $a->lateDurationInHours ?? 0));
+        $totalOvertime = $attendances->sum(fn($a) => max(0, $a->overtimeDurationInHours ?? 0));
+
+        $daily_rate = $employee->salary / 30;
+        $salaryPerHour = $employee->working_hours_per_day > 0 ? $daily_rate / $employee->working_hours_per_day : 0;
+
+        $late_deduction_amount = $this->round2($this->calculateDeduction($totalLate, $generalSettings->deduction_type, $generalSettings->deduction_value, $salaryPerHour));
+        $overtime_value = $this->round2($this->calculateOvertime($totalOvertime, $generalSettings->overtime_type, $generalSettings->overtime_value, $salaryPerHour));
+
+        $totalPaidDays = $attendedDays + $weekendCount + $holidayCount;
+
+        // ✅ لو ماحضّرش ولا يوم، المرتب = 0
+        if ($attendedDays == 0) {
+            $net_salary = 0;
+        } else {
+            $net_salary = $this->round2(max(0, $totalPaidDays * $daily_rate - $late_deduction_amount + $overtime_value));
+        }
+
+        $payrollData = [
+            'month_days' => $businessDays,
+            'attended_days' => $attendedDays,
+            'absent_days' => $absentDays,
+            'total_overtime' => $totalOvertime,
+            'total_bonus_amount' => $overtime_value,
+            'total_late_hours' => $totalLate,
+            'total_deduction_amount' => $late_deduction_amount,
+            'net_salary' => $net_salary,
+            'absence_deduction_amount' => 0,
+            'late_deduction_amount' => $late_deduction_amount,
+        ];
+
+        if ($existingPayroll) {
+            $existingPayroll->update($payrollData);
+            $payroll = $existingPayroll;
+            $message = $net_salary == 0 ? 'Payroll updated, but net salary is 0. No attendance.' : 'Payroll updated successfully.';
+        } else {
+            $payroll = Payroll::create(array_merge([
+                'employee_id' => $employee->id,
+                'month' => $request->month,
+            ], $payrollData));
+            $message = $net_salary == 0 ? 'Payroll created, but net salary is 0. No attendance.' : 'Payroll calculated successfully.';
+        }
+
+        Log::info("Payroll recalculated for employee {$employee->id} for month {$request->month}", [
+            'businessDays' => $businessDays,
+            'attendedDays' => $attendedDays,
+            'net_salary' => $net_salary,
         ]);
 
-        $employee = Employee::with('generalSetting')->find($request->employee_id);
-        $generalSettings = $employee->generalSetting;
-
-        if (!$generalSettings) {
-            Log::warning("No general settings found for employee {$employee->id}");
+        return response()->json([
+            'success' => true,
+            'data' => $payroll,
+            'message' => $message
+        ]);
+    } catch (\Illuminate\Database\QueryException $e) {
+        Log::error("Payroll recalculation failed for employee {$request->employee_id} for month {$request->month}", [
+            'error' => $e->getMessage(),
+        ]);
+        if ($e->getCode() == 23000) {
             return response()->json([
                 'success' => false,
-                'message' => 'Employee settings not found.'
-            ], 400);
+                'message' => 'A payroll record for this employee and month already exists.'
+            ], 409);
         }
-
-        try {
-            $existingPayroll = Payroll::where('employee_id', $employee->id)
-                ->where('month', $request->month)
-                ->first();
-
-            $monthStart = Carbon::createFromFormat('Y-m', $request->month)->startOfMonth();
-            $monthEnd = $monthStart->copy()->endOfMonth();
-            $monthDays = $monthStart->daysInMonth;
-
-    $weekend_days = json_decode($generalSettings->weekend_days, true) ?? ['Saturday', 'Sunday'];
-
-if (!is_array($weekend_days)) {
-    Log::warning("Invalid weekend_days format for employee {$employee->id}", [
-        'value' => $generalSettings->weekend_days,
-    ]);
-    $weekend_days = ['Saturday', 'Sunday'];
+        throw $e;
+    }
 }
 
-$officialHolidays = Holiday::whereBetween('date', [$monthStart, $monthEnd])
-    ->pluck('date')
-    ->map(fn($d) => Carbon::parse($d)->toDateString())
-    ->toArray();
-
-$period = CarbonPeriod::create($monthStart->copy(), $monthEnd->copy());
-
-$businessDays = collect($period)->filter(function ($date) use ($weekend_days, $officialHolidays) {
-    return !in_array($date->format('l'), $weekend_days) && !in_array($date->toDateString(), $officialHolidays);
-})->count();
-
-            $attendances = Attendence::where('employee_id', $employee->id)
-                ->whereBetween('date', [$monthStart, $monthEnd])
-                ->get();
-
-            $attendedDays = $attendances->unique('date')->count();
-            $absentDays = max(0, $businessDays - $attendedDays);
-            $totalLate = $attendances->sum(fn($a) => max(0, $a->lateDurationInHours ?? 0));
-            $totalOvertime = $attendances->sum(fn($a) => max(0, $a->overtimeDurationInHours ?? 0));
-
-            $daily_rate = $employee->salary / 30; // Assuming 30 days in a month for simplicity
-            $salaryPerHour = $employee->working_hours_per_day > 0 ? $daily_rate / $employee->working_hours_per_day : 0;
-
-            $late_deduction_amount = $this->round2($this->calculateDeduction($totalLate, $generalSettings->deduction_type, $generalSettings->deduction_value, $salaryPerHour));
-            $overtime_value = $this->round2($this->calculateOvertime($totalOvertime, $generalSettings->overtime_type, $generalSettings->overtime_value, $salaryPerHour));
-
-            $net_salary = $this->round2(max(0, ($attendedDays * $daily_rate) - $late_deduction_amount + $overtime_value));
-
-            $payrollData = [
-                'month_days' => $businessDays,
-                'attended_days' => $attendedDays,
-                'absent_days' => $absentDays,
-                'total_overtime' => $totalOvertime,
-                'total_bonus_amount' => $overtime_value,
-                'total_late_hours' => $totalLate,
-                'total_deduction_amount' => $late_deduction_amount,
-                'net_salary' => $net_salary,
-                'absence_deduction_amount' => 0,
-                'late_deduction_amount' => $late_deduction_amount,
-            ];
-
-            if ($existingPayroll) {
-                $existingPayroll->update($payrollData);
-                $payroll = $existingPayroll;
-                $message = $net_salary == 0 ? 'Payroll updated, but net salary is 0. No attendance.' : 'Payroll updated successfully.';
-            } else {
-                $payroll = Payroll::create(array_merge([
-                    'employee_id' => $employee->id,
-                    'month' => $request->month,
-                ], $payrollData));
-                $message = $net_salary == 0 ? 'Payroll created, but net salary is 0. No attendance.' : 'Payroll calculated successfully.';
-            }
-
-            Log::info("Payroll recalculated for employee {$employee->id} for month {$request->month}", [
-                'businessDays' => $businessDays,
-                'attendedDays' => $attendedDays,
-                'net_salary' => $net_salary,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'data' => $payroll,
-                'message' => $message
-            ]);
-        } catch (\Illuminate\Database\QueryException $e) {
-            Log::error("Payroll recalculation failed for employee {$request->employee_id} for month {$request->month}", [
-                'error' => $e->getMessage(),
-            ]);
-            if ($e->getCode() == 23000) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'A payroll record for this employee and month already exists.'
-                ], 409);
-            }
-            throw $e;
-        }
-    }
     public function getCurrentMonth()
     {
         $currentMonth = Carbon::now()->format('Y-m');

@@ -1,18 +1,90 @@
+
 .login-page {
   height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #fafafa 0%, #e6e6fa 100%);
-  font-family: 'Inter', sans-serif;
+   background: linear-gradient(135deg, #fafafa 0%, #e6e6fa 100%);
   color: #333;
-  margin: 0;
   animation: modalPop 0.4s ease-out;
 }
 
-.login-container.glass-card {
-  background: rgba(255, 255, 255, 0.95);
+.sidenav {
+  height: 100%;
+  width: 100%;
+  padding-top: 20px;
+  overflow-x: hidden;
+  background: linear-gradient(145deg, #5a3a8f 0%, #6b48a3 40%, #a78bd4 80%);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
 
+.login-main-text {
+  margin-top: 15%;
+  padding: 40px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+.hr-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.icon-wrapper:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.hr-icon {
+  font-size: 3.5rem;
+  color: #fff;
+  animation: pulse 2.5s infinite ease-in-out;
+}
+
+.hr-icon:hover {
+  color: #e6e6fa;
+}
+
+.login-main-text h2 {
+  font-weight: 500;
+  font-size: clamp(2rem, 5vw, 2.5rem);
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.login-main-text p {
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: #e6e6fa;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.main {
+  padding: 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 100vh;
+}
+
+.login-container {
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 22px;
   border: 1px solid #ccc;
   box-shadow: 0 6px 12px rgba(172, 112, 198, 0.25);
@@ -40,12 +112,12 @@
 .header-title h3 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #ac70c6;
+  color: #6b48a3;
 }
 
 .header-icon {
   font-size: 1.8rem;
-  color: #ac70c6;
+  color: #6b48a3;
 }
 
 .form-group {
@@ -116,7 +188,7 @@ label {
 }
 
 .toggle-password:hover {
-  color: #8b5db4;
+  color: #9b59b6;
 }
 
 .form-options {
@@ -146,24 +218,49 @@ label {
 }
 
 .forgot-link:hover {
-  color: #8b5db4;
+  color: #9b59b6;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
 }
 
 .form-button {
   width: 100%;
+  max-width: 150px;
   padding: 0.5rem 1rem;
   border: 1px solid #6b48a3;
-  background: #6b48a3;
   border-radius: 8px;
-  color: #fff;
   font-weight: 500;
   font-size: 0.85rem;
   transition: all 0.3s ease, transform 0.2s ease;
+  text-align: center;
+  text-decoration: none;
 }
 
-.form-button:hover {
-  background: #8b5db4;
-  border-color: #8b5db4;
+.btn-black {
+  background: #6b48a3;
+  color: #fff;
+}
+
+.btn-black:hover {
+  background: #9b59b6;
+  border-color: #9b59b6;
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #6b48a3;
+  border: 1px solid #6b48a3;
+}
+
+.btn-secondary:hover {
+  background: #e6e6fa;
+  border-color: #9b59b6;
+  color: #9b59b6;
   transform: scale(1.05);
 }
 
@@ -194,6 +291,36 @@ label {
   margin-top: 0.5rem;
   text-align: left;
   animation: fadeIn 0.3s ease-in;
+}
+
+.success-container {
+  text-align: center;
+}
+
+.success-container h4 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #6b48a3;
+  margin-bottom: 0.5rem;
+}
+
+.success-icon {
+  font-size: 2rem;
+  color: #28a745;
+  margin-bottom: 0.5rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #6b48a3;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.back-link:hover {
+  color: #9b59b6;
 }
 
 .loading-overlay {
@@ -246,15 +373,88 @@ footer {
   to { transform: rotate(360deg); }
 }
 
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
 /* Responsive Styling */
-@media (max-width: 768px) {
-  .login-page {
-    padding: 0.75rem;
+@media screen and (max-height: 450px) {
+  .sidenav {
+    padding-top: 15px;
+  }
+
+  .login-main-text {
+    margin-top: 10%;
+    gap: 1rem;
+  }
+
+  .hr-icons {
+    gap: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .login-container {
+    padding: 1rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-button {
+    max-width: 100%;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .sidenav {
+    width: 40%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+  }
+
+  .main {
+    margin-left: 40%;
   }
 
   .login-container {
-    padding: 1.5rem;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+    padding: 0.75rem;
+  }
+
+  .sidenav {
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+  }
+
+  .login-main-text {
+    margin-top: 0;
+    padding: 2rem;
+    gap: 1rem;
+  }
+
+  .main {
+    margin-left: 0;
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .login-container {
     max-width: 100%;
+    padding: 1.5rem;
   }
 
   .header-title h3 {
@@ -277,7 +477,8 @@ footer {
 
   .remember-row,
   .password-row,
-  .forgot-link {
+  .forgot-link,
+  .back-link {
     font-size: 0.8rem;
   }
 
@@ -288,6 +489,20 @@ footer {
   .spinner {
     width: 1.5rem;
     height: 1.5rem;
+  }
+
+  .hr-icons {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .icon-wrapper {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .hr-icon {
+    font-size: 2.5rem;
   }
 }
 
@@ -318,7 +533,8 @@ footer {
   .form-success,
   .remember-row,
   .password-row,
-  .forgot-link {
+  .forgot-link,
+  .back-link {
     font-size: 0.75rem;
   }
 
@@ -331,7 +547,51 @@ footer {
     height: 1.2rem;
   }
 
+  .login-main-text h2 {
+    font-size: 1.8rem;
+  }
+
+  .login-main-text p {
+    font-size: 0.9rem;
+  }
+
+  .hr-icons {
+    gap: 1rem;
+  }
+
+  .icon-wrapper {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .hr-icon {
+    font-size: 2rem;
+  }
+
   footer {
     font-size: 0.7rem;
   }
+
+  .success-container h4 {
+    font-size: 1.2rem;
+  }
+
+  .success-icon {
+    font-size: 1.5rem;
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

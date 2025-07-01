@@ -1,3 +1,14 @@
+
+
+
+
+
+
+
+
+
+
+// HolidaysPage.js
 import React, { useEffect, useState } from "react";
 import {
   FaCalendarPlus, FaEdit, FaTrash, FaCalendarAlt,
@@ -21,6 +32,7 @@ export default function HolidaysPage() {
   const [formError, setFormError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [holidayToDelete, setHolidayToDelete] = useState(null);
+  const [filterDate, setFilterDate] = useState("");
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "Not specified";
@@ -35,10 +47,18 @@ export default function HolidaysPage() {
     try {
       const { data } = await api.get("/holidays");
       setHolidays(data?.data || []);
-      toast.success("Holidays loaded!", { position: "top-right", autoClose: 3000 });
+      toast.success("Holidays loaded!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "holidays-loaded"
+      });
     } catch (error) {
       console.error("Fetch holidays error:", error);
-      toast.error("Failed to load holidays!", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to load holidays!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "fetch-error"
+      });
     } finally {
       setLoading(false);
     }
@@ -59,7 +79,11 @@ export default function HolidaysPage() {
 
     if (!form.name.trim() || !form.date) {
       setFormError("Holiday name and date are required.");
-      toast.error("Holiday name and date are required!", { position: "top-right", autoClose: 3000 });
+      toast.error("Holiday name and date are required!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "form-error"
+      });
       setActionLoading(false);
       return;
     }
@@ -67,17 +91,29 @@ export default function HolidaysPage() {
     try {
       if (editHoliday) {
         await api.put(`/holidays/${editHoliday.id}`, form);
-        toast.success("Holiday updated!", { position: "top-right", autoClose: 3000 });
+        toast.success("Holiday updated!", {
+          position: "top-right",
+          autoClose: 1000,
+          toastId: "update-success"
+        });
         setEditHoliday(null);
       } else {
         await api.post("/holidays", form);
-        toast.success("Holiday created!", { position: "top-right", autoClose: 3000 });
+        toast.success("Holiday created!", {
+          position: "top-right",
+          autoClose: 1000,
+          toastId: "create-success"
+        });
       }
       fetchHolidays();
       setForm({ name: "", date: "" });
     } catch {
       setFormError("Failed to save holiday!");
-      toast.error("Failed to save holiday!", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to save holiday!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "save-error"
+      });
     } finally {
       setActionLoading(false);
     }
@@ -99,16 +135,28 @@ export default function HolidaysPage() {
     setActionLoading(true);
     try {
       await api.delete(`/holidays/${holidayToDelete.id}`);
-      toast.success("Holiday deleted!", { position: "top-right", autoClose: 3000 });
+      toast.success("Holiday deleted!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "delete-success"
+      });
       fetchHolidays();
       handleCloseConfirm();
     } catch {
-      toast.error("Failed to delete holiday!", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to delete holiday!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "delete-error"
+      });
       handleCloseConfirm();
     } finally {
       setActionLoading(false);
     }
   };
+
+  const filteredHolidays = filterDate
+    ? holidays.filter(h => new Date(h.date).toISOString().split("T")[0] === filterDate)
+    : holidays;
 
   const holidaysByMonth = holidays.reduce((acc, holiday) => {
     const month = new Date(holiday.date).toLocaleString("default", { month: "long", year: "numeric" });
@@ -136,7 +184,7 @@ export default function HolidaysPage() {
 
   const now = new Date();
 
-  return (
+    return (
     <div className="hol-page-wrapper">
       <ToastContainer />
       <header className="hol-header">
@@ -146,6 +194,10 @@ export default function HolidaysPage() {
         </div>
       </header>
 
+      {/* ضع الفلتر هنا مباشرة بعد الهيدر */}
+  
+
+      {/* الإحصائيات */}
       <div className="hol-stats-container">
         <div className="hol-stat-card">
           <FaChartPie className="hol-stat-icon" />
@@ -198,6 +250,7 @@ export default function HolidaysPage() {
           </ResponsiveContainer>
         </div>
       </div>
+      
 
       <form onSubmit={handleSubmit} className="hol-form">
         <input
@@ -225,52 +278,82 @@ export default function HolidaysPage() {
           <FaCalendarPlus /> {editHoliday ? "Update" : "Add"} Holiday
         </button>
       </form>
-
+    <form
+        onSubmit={e => e.preventDefault()}
+        style={{ margin: "1rem 0", display: "flex", gap: "1rem", alignItems: "center" }}
+      >
+        <input
+          type="date"
+          className="hol-form-input"
+          value={filterDate}
+          onChange={e => setFilterDate(e.target.value)}
+          style={{ maxWidth: 220 }}
+        />
+        <button
+          type="button"
+          className="hol-form-button"
+          onClick={() => setFilterDate("")}
+        >
+          Reset
+        </button>
+      </form>
       {formError && <div className="hol-form-error">{formError}</div>}
 
       {loading ? (
         <div className="hol-spinner-wrapper"><Spinner /></div>
-      ) : holidays.length === 0 ? (
+      ) : filteredHolidays.length === 0 ? (
         <div className="hol-no-holidays">
           <p>No holidays found.</p>
         </div>
       ) : (
         <div className="hol-calendar-view">
-          {Object.keys(holidaysByMonth).map((month) => (
+          {Object.keys(
+            filteredHolidays.reduce((acc, holiday) => {
+              const month = new Date(holiday.date).toLocaleString("default", { month: "long", year: "numeric" });
+              if (!acc[month]) acc[month] = [];
+              acc[month].push(holiday);
+              return acc;
+            }, {})
+          ).map((month) => (
             <div key={month} className="hol-month-section">
               <h3 className="hol-month-title">{month}</h3>
               <div className="hol-holiday-grid">
-                {holidaysByMonth[month].map((holiday) => {
-                  const isCurrentMonth = new Date(holiday.date).getMonth() === now.getMonth() &&
-                    new Date(holiday.date).getFullYear() === now.getFullYear();
-                  return (
-                    <div key={holiday.id} className={`hol-card ${isCurrentMonth ? 'hol-current-month' : ''}`}>
-                      <div className="hol-content">
-                        <h4>{holiday.name}</h4>
-                        <p>{formatDate(holiday.date)}</p>
-                        <div className="hol-actions">
-                          <button
-                            className="hol-action-button hol-edit"
-                            onClick={() => {
-                              setEditHoliday(holiday);
-                              setForm({ name: holiday.name, date: holiday.date });
-                            }}
-                            disabled={actionLoading}
-                          >
-                            {actionLoading && editHoliday?.id === holiday.id ? <Spinner /> : <><FaEdit /> Edit</>}
-                          </button>
-                          <button
-                            className="hol-action-button hol-delete"
-                            onClick={() => handleShowConfirm(holiday)}
-                            disabled={actionLoading}
-                          >
-                            {actionLoading && holidayToDelete?.id === holiday.id ? <Spinner /> : <><FaTrash /> Delete</>}
-                          </button>
+                {filteredHolidays
+                  .filter(h => {
+                    const m = new Date(h.date).toLocaleString("default", { month: "long", year: "numeric" });
+                    return m === month;
+                  })
+                  .map((holiday) => {
+                    const isCurrentMonth = new Date(holiday.date).getMonth() === now.getMonth() &&
+                      new Date(holiday.date).getFullYear() === now.getFullYear();
+                    return (
+                      <div key={holiday.id} className={`hol-card ${isCurrentMonth ? 'hol-current-month' : ''}`}>
+                        <div className="hol-content">
+                          <h4>{holiday.name}</h4>
+                          <p>{formatDate(holiday.date)}</p>
+                          <div className="hol-actions">
+                            <button
+                              className="hol-action-button hol-edit"
+                              onClick={() => {
+                                setEditHoliday(holiday);
+                                setForm({ name: holiday.name, date: holiday.date });
+                              }}
+                              disabled={actionLoading}
+                            >
+                              {actionLoading && editHoliday?.id === holiday.id ? <Spinner /> : <><FaEdit /> Edit</>}
+                            </button>
+                            <button
+                              className="hol-action-button hol-delete"
+                              onClick={() => handleShowConfirm(holiday)}
+                              disabled={actionLoading}
+                            >
+                              {actionLoading && holidayToDelete?.id === holiday.id ? <Spinner /> : <><FaTrash /> Delete</>}
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </div>
           ))}

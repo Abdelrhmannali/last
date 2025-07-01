@@ -23,6 +23,7 @@ export default function PayrollTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentMonth, setCurrentMonth] = useState("");
   const [allMonths, setAllMonths] = useState([]);
+  const [allEmployees, setAllEmployees] = useState([]);
   const itemsPerPage = 10;
 
   const fetchMonths = useCallback(async () => {
@@ -62,6 +63,14 @@ export default function PayrollTable() {
     }
   }, [fetchData, currentMonth]);
 
+  // جلب بيانات الموظفين (id, first_name, last_name, profile_picture)
+  useEffect(() => {
+    api
+      .get("/employees?fields=id,first_name,last_name,profile_picture")
+      .then((res) => setAllEmployees(res.data.data || []))
+      .catch(() => setAllEmployees([]));
+  }, []);
+
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
       employees.map((emp) => ({
@@ -93,8 +102,24 @@ export default function PayrollTable() {
   );
 
   const getImageUrl = (emp) => {
-    if (emp.profile_picture) return `http://127.0.0.1:8000/storage/${emp.profile_picture}`;
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.employee_full_name)}&background=random&color=fff&rounded=true`;
+    // ابحث عن الموظف في allEmployees
+    const found = allEmployees.find(
+      (e) =>
+        (emp.id && e.id === emp.id) ||
+        (emp.employee_full_name &&
+          `${e.first_name} ${e.last_name}`.trim() === emp.employee_full_name.trim())
+    );
+    if (found && found.profile_picture)
+      return `http://localhost:8000/storage/${found.profile_picture}`;
+    // إذا موجود في بيانات الـ Payroll
+    if (emp.profile_image_url) return emp.profile_image_url;
+    if (emp.profile_picture_url) return emp.profile_picture_url;
+    if (emp.profile_picture)
+      return `http://localhost:8000/storage/${emp.profile_picture}`;
+    // صورة افتراضية باسم الموظف
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      emp.employee_full_name || emp.full_name || emp.name || "User"
+    )}&background=ac70c6&color=fff&rounded=true`;
   };
 
   const averageSalary = employees.length
@@ -117,72 +142,74 @@ export default function PayrollTable() {
       </div>
 
       {/* Stats */}
-   
+      <div className="payroll-stats-container">
+        <div className="payroll-stat-card">
+          <FaUsers
+            size={38}
+            style={{ color: "#6b48a3", marginBottom: "0.5rem" }}
+          />
+          <p>Total Employees</p>
+          <h3 style={{ fontSize: "2.5rem" }}>{employees.length}</h3>
+        </div>
 
+        <div className="payroll-stat-card">
+          <FaMoneyBillWave
+            size={38}
+            style={{ color: "#6b48a3", marginBottom: "0.5rem" }}
+          />
+          <p>Total Net Salaries</p>
+          <h3 style={{ fontSize: "2.5rem" }}>
+            {employees
+              .reduce((sum, e) => sum + parseFloat(e.net_salary || 0), 0)
+              .toLocaleString()}{" "}
+            EGP
+          </h3>
+        </div>
 
-
-<div className="payroll-stats-container">
-  <div className="payroll-stat-card">
-    <FaUsers size={38} style={{ color: "#6b48a3", marginBottom: "0.5rem" }} />
-    <p>Total Employees</p>
-    <h3 style={{ fontSize: "2.5rem" }}>{employees.length}</h3>
-  </div>
-
-  <div className="payroll-stat-card">
-    <FaMoneyBillWave size={38} style={{ color: "#6b48a3", marginBottom: "0.5rem" }} />
-    <p>Total Net Salaries</p>
-    <h3 style={{ fontSize: "2.5rem" }}>
-      {employees
-        .reduce((sum, e) => sum + parseFloat(e.net_salary || 0), 0)
-        .toLocaleString()}{" "}
-      EGP
-    </h3>
-  </div>
-
-  <div className="payroll-stat-card">
-    <FaMoneyBillWave size={38} style={{ color: "#6b48a3", marginBottom: "0.5rem" }} />
-    <p>Average Salary</p>
-    <h3 style={{ fontSize: "2.5rem" }}>{averageSalary} EGP</h3>
-  </div>
-</div>
-
+        <div className="payroll-stat-card">
+          <FaMoneyBillWave
+            size={38}
+            style={{ color: "#6b48a3", marginBottom: "0.5rem" }}
+          />
+          <p>Average Salary</p>
+          <h3 style={{ fontSize: "2.5rem" }}>{averageSalary} EGP</h3>
+        </div>
+      </div>
 
       {/* Filter Form */}
-    <div className="payroll-form mt-4">
-  <Form.Control
-    type="text"
-    placeholder="Search employee..."
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    className="payroll-form-input flex-grow-1"
-    style={{ minWidth: "200px" }}
-  />
-  <Form.Select
-    value={currentMonth}
-    onChange={(e) => {
-      setCurrentMonth(e.target.value);
-      setCurrentPage(1);
-    }}
-    className="payroll-form-input"
-    style={{ width: "180px" }}
-  >
-    <option value="">Select Month</option>
-    {allMonths.map((month) => (
-      <option key={month} value={month}>
-        {month}
-      </option>
-    ))}
-  </Form.Select>
-  <Button
- 
-    onClick={exportToExcel}
-    className="payroll-form-button"
-    style={{ whiteSpace: "nowrap", width: "130px" }}
-  >
-    <FaFileExcel className="me-2" /> Export
-  </Button>
-</div>
-
+      <div className="payroll-form mt-4">
+        <Form.Control
+          type="text"
+          placeholder="Search employee..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="payroll-form-input flex-grow-1"
+          style={{ minWidth: "200px" }}
+        />
+        <Form.Select
+          value={currentMonth}
+          onChange={(e) => {
+            setCurrentMonth(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="payroll-form-input"
+          style={{ width: "180px" }}
+        >
+          <option value="">Select Month</option>
+          {allMonths.map((month) => (
+            <option key={month} value={month}>
+              {month}
+            </option>
+          ))}
+        </Form.Select>
+        <Button
+          onClick={exportToExcel}
+          className="payroll-form-button"
+          style={{ whiteSpace: "nowrap", width: "130px" }}
+        >
+          <FaFileExcel className="me-2" /> Export
+        </Button>
+      </div>
 
       {/* Loading */}
       {loading ? (

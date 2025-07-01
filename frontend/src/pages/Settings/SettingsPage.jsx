@@ -32,7 +32,7 @@ export default function SettingsPage() {
       setEmployees(employeeData);
     } catch (error) {
       console.error("Error fetching employees:", error.response?.data || error.message);
-      toast.error("Failed to load employees!", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to load employees!", { position: "top-right", autoClose: 1000 });
     }
   };
 
@@ -41,10 +41,10 @@ export default function SettingsPage() {
       const { data } = await api.get("/settings");
       const settingsData = Array.isArray(data.data) ? data.data : data.data ? [data.data] : [];
       setSettings(settingsData);
-      toast.success("Settings loaded!", { position: "top-right", autoClose: 3000 });
+      toast.success("Settings loaded!", { position: "top-right", autoClose: 1000 });
     } catch (error) {
       console.error("Error fetching settings:", error.response?.data || error.message);
-      toast.error("Failed to load settings!", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to load settings!", { position: "top-right", autoClose: 1000 });
     }
   };
 
@@ -63,18 +63,34 @@ export default function SettingsPage() {
     setForm({ ...form, [name]: value });
   };
 
-  const handleCheckboxChange = (day) => {
-    setForm((prev) => {
-      const weekend_days = prev.weekend_days.includes(day)
-        ? prev.weekend_days.filter((d) => d !== day)
-        : [...prev.weekend_days, day];
-      if (weekend_days.length > 2) {
-        toast.error("You can select only two weekend days!", { position: "top-right", autoClose: 3000 });
-        return prev; // Prevent adding more than two days
+const handleCheckboxChange = (day) => {
+  setForm((prev) => {
+    let currentWeekendDays = [];
+
+    // تأكد أن weekend_days عبارة عن Array
+    if (Array.isArray(prev.weekend_days)) {
+      currentWeekendDays = prev.weekend_days;
+    } else if (typeof prev.weekend_days === "string") {
+      try {
+        currentWeekendDays = JSON.parse(prev.weekend_days);
+      } catch {
+        currentWeekendDays = [];
       }
-      return { ...prev, weekend_days };
-    });
-  };
+    }
+
+    const weekend_days = currentWeekendDays.includes(day)
+      ? currentWeekendDays.filter((d) => d !== day)
+      : [...currentWeekendDays, day];
+
+    if (weekend_days.length > 2) {
+      toast.error("You can select only two weekend days!", { position: "top-right", autoClose: 1000 });
+      return prev; // لا تغيّر القيمة
+    }
+
+    return { ...prev, weekend_days };
+  });
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,14 +99,14 @@ export default function SettingsPage() {
 
     if (!form.employee_id || !form.deduction_value || !form.overtime_value) {
       setFormError("All fields are required.");
-      toast.error("All fields are required!", { position: "top-right", autoClose: 3000 });
+      toast.error("All fields are required!", { position: "top-right", autoClose: 1000 });
       setActionLoading(false);
       return;
     }
 
     if (form.weekend_days.length !== 2) {
       setFormError("You must select exactly two weekend days.");
-      toast.error("You must select exactly two weekend days!", { position: "top-right", autoClose: 3000 });
+      toast.error("You must select exactly two weekend days!", { position: "top-right", autoClose: 1000 });
       setActionLoading(false);
       return;
     }
@@ -99,11 +115,11 @@ export default function SettingsPage() {
       const payload = { ...form, employee_id: String(form.employee_id) };
       if (editSetting) {
         await api.put(`/settings/${editSetting.employee_id}`, payload);
-        toast.success("Setting updated!", { position: "top-right", autoClose: 3000 });
+        toast.success("Setting updated!", { position: "top-right", autoClose: 1000 });
         setEditSetting(null);
       } else {
         await api.post("/settings", payload);
-        toast.success("Setting created!", { position: "top-right", autoClose: 3000 });
+        toast.success("Setting created!", { position: "top-right", autoClose: 1000 });
       }
       await fetchSettings();
       setForm({
@@ -118,7 +134,7 @@ export default function SettingsPage() {
       const errorMsg = error.response?.data?.message || "Failed to save setting!";
       console.error("Error saving setting:", error.response?.data || error.message);
       setFormError(errorMsg);
-      toast.error(errorMsg, { position: "top-right", autoClose: 3000 });
+      toast.error(errorMsg, { position: "top-right", autoClose: 1000 });
     } finally {
       setActionLoading(false);
     }
@@ -132,7 +148,7 @@ export default function SettingsPage() {
       deduction_value: setting.deduction_value,
       overtime_type: setting.overtime_type,
       overtime_value: setting.overtime_value,
-      weekend_days: JSON.parse(setting.weekend_days || "[]"),
+     weekend_days: setting.weekend_days || [],
     });
   };
 
@@ -150,12 +166,12 @@ export default function SettingsPage() {
     setActionLoading(true);
     try {
       await api.delete(`/settings/${settingToDelete.employee_id}`);
-      toast.success("Setting deleted!", { position: "top-right", autoClose: 3000 });
+      toast.success("Setting deleted!", { position: "top-right", autoClose: 1000 });
       await fetchSettings();
       handleCloseConfirm();
     } catch (error) {
       console.error("Error deleting setting:", error.response?.data || error.message);
-      toast.error("Failed to delete setting!", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to delete setting!", { position: "top-right", autoClose: 1000 });
       handleCloseConfirm();
     } finally {
       setActionLoading(false);
@@ -184,9 +200,24 @@ export default function SettingsPage() {
     ? (settings.reduce((sum, s) => sum + parseFloat(s.overtime_value || 0), 0) / settings.length).toFixed(2)
     : 0;
   const weekendDaysData = daysOfWeek.map((day) => ({
-    name: day,
-    count: settings.filter((s) => JSON.parse(s.weekend_days || "[]").includes(day)).length,
-  }));
+  name: day,
+  count: settings.filter((s) => {
+    let weekendDays = [];
+    if (typeof s.weekend_days === "string") {
+      try {
+        weekendDays = JSON.parse(s.weekend_days);
+      } catch {
+        weekendDays = [];
+      }
+    } else if (Array.isArray(s.weekend_days)) {
+      weekendDays = s.weekend_days;
+    }
+    return weekendDays.includes(day);
+  }).length,
+}));
+
+
+
 
   return (
     <div className="set-page-wrapper">
@@ -354,7 +385,21 @@ export default function SettingsPage() {
                 </h4>
                 <p>Deduction: {setting.deduction_type} ({setting.deduction_value})</p>
                 <p>Overtime: {setting.overtime_type} ({setting.overtime_value})</p>
-                <p>Weekend Days: {JSON.parse(setting.weekend_days || "[]").join(", ") || "None"}</p>
+              <p>
+  Weekend Days: {
+    (() => {
+      try {
+        const weekendDays = Array.isArray(setting.weekend_days)
+          ? setting.weekend_days
+          : JSON.parse(setting.weekend_days || "[]");
+        return weekendDays.length > 0 ? weekendDays.join(", ") : "None";
+      } catch {
+        return "None";
+      }
+    })()
+  }
+</p>
+
                 <div className="set-actions">
                   <button
                     className="set-action-button set-edit"

@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { Form, Spinner } from "react-bootstrap";
+import { Form, Spinner, Alert } from "react-bootstrap";
 import { FaUserPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 import api from "../../api";
 import "./HRForm.css";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export default function AddHrPage() {
   const [form, setForm] = useState({
@@ -17,7 +15,7 @@ export default function AddHrPage() {
 
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
-  const [formError, setFormError] = useState("");
+  const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -29,17 +27,16 @@ export default function AddHrPage() {
     } else {
       setForm({ ...form, [name]: value });
     }
-    setFormError("");
+    setMessage("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setFormError("");
+    setMessage("");
 
     if (form.password !== form.confirmPassword) {
-      setFormError("Passwords do not match.");
-      toast.error("Passwords do not match!", { position: "top-right", autoClose: 3000 });
+      setMessage("❌ Passwords do not match.");
       setLoading(false);
       return;
     }
@@ -54,13 +51,18 @@ export default function AddHrPage() {
 
     try {
       await api.post("/hr/AddHr", formData);
-      toast.success("HR added successfully!", { position: "top-right", autoClose: 3000 });
-      setForm({ name: "", email: "", password: "", confirmPassword: "", profile_picture: null });
+      setMessage("✅ HR added successfully.");
+      setForm({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        profile_picture: null,
+      });
       setPreview(null);
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Failed to add HR!";
-      setFormError(errorMsg);
-      toast.error(errorMsg, { position: "top-right", autoClose: 3000 });
+      setMessage("❌ " + errorMsg);
     } finally {
       setLoading(false);
     }
@@ -68,15 +70,20 @@ export default function AddHrPage() {
 
   return (
     <div className="hr-page-wrapper">
-      <ToastContainer />
       <div className="hr-glass-card p-4">
         <div className="header-title">
           <FaUserPlus className="header-icon" />
           <h3 className="hr-form-title">Add New HR</h3>
         </div>
-        {formError && <div className="form-error">{formError}</div>}
+
+        {message && (
+          <Alert variant={message.startsWith("✅") ? "success" : "danger"}>
+            {message}
+          </Alert>
+        )}
+
         <Form onSubmit={handleSubmit} encType="multipart/form-data">
-          <div className="form-group">
+          <Form.Group className="mb-3">
             <Form.Label>Name</Form.Label>
             <Form.Control
               name="name"
@@ -86,9 +93,9 @@ export default function AddHrPage() {
               placeholder="Enter name"
               className="form-input"
             />
-          </div>
+          </Form.Group>
 
-          <div className="form-group">
+          <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             <Form.Control
               name="email"
@@ -99,9 +106,9 @@ export default function AddHrPage() {
               placeholder="Enter email"
               className="form-input"
             />
-          </div>
+          </Form.Group>
 
-          <div className="form-group">
+          <Form.Group className="mb-3">
             <Form.Label>Password</Form.Label>
             <div className="password-wrapper">
               <Form.Control
@@ -120,9 +127,9 @@ export default function AddHrPage() {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
-          </div>
+          </Form.Group>
 
-          <div className="form-group">
+          <Form.Group className="mb-3">
             <Form.Label>Confirm Password</Form.Label>
             <div className="password-wrapper">
               <Form.Control
@@ -141,9 +148,9 @@ export default function AddHrPage() {
                 {showConfirm ? <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
-          </div>
+          </Form.Group>
 
-          <div className="form-group">
+          <Form.Group className="mb-3">
             <Form.Label>Profile Picture</Form.Label>
             <Form.Control
               name="profile_picture"
@@ -152,15 +159,15 @@ export default function AddHrPage() {
               onChange={handleChange}
               className="form-input"
             />
-          </div>
+          </Form.Group>
 
-          {preview && <img src={preview} alt="Preview" className="hr-img-preview" />}
-          
-          <button
-            type="submit"
-            className="form-button"
-            disabled={loading}
-          >
+          {preview && (
+            <div className="text-center mb-3">
+              <img src={preview} alt="Preview" className="hr-img-preview" />
+            </div>
+          )}
+
+          <button type="submit" className="form-button" disabled={loading}>
             {loading ? <Spinner size="sm" animation="border" /> : "Add HR"}
           </button>
         </Form>

@@ -15,7 +15,7 @@ class GeneralSetting extends Model
         'overtime_value',
         'weekend_days',
     ];
-    protected $casts = [
+protected $casts = [
     'weekend_days' => 'array',
 ];
 

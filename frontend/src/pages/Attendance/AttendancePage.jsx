@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CSVLink } from "react-csv";
 import jsPDF from "jspdf";
@@ -32,7 +33,7 @@ export default function AttendancePage() {
   const [employees, setEmployees] = useState([]);
   const [filters, setFilters] = useState({
     employee_name: "",
-    department_name: "",
+    department: "",
     date: "",
   });
   const [checkInFormData, setCheckInFormData] = useState({
@@ -53,6 +54,32 @@ export default function AttendancePage() {
   });
   const [loading, setLoading] = useState(false);
 
+  const getCurrentDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toTimeString().slice(0, 5);
+  };
+
+  const handleSetCurrentCheckInDate = () => {
+    setCheckInFormData({ ...checkInFormData, date: getCurrentDate() });
+  };
+
+  const handleSetCurrentCheckInTime = () => {
+    setCheckInFormData({ ...checkInFormData, checkInTime: getCurrentTime() });
+  };
+
+  const handleSetCurrentCheckOutDate = () => {
+    setCheckOutFormData({ ...checkOutFormData, date: getCurrentDate() });
+  };
+
+  const handleSetCurrentCheckOutTime = () => {
+    setCheckOutFormData({ ...checkOutFormData, checkOutTime: getCurrentTime() });
+  };
+
   useEffect(() => {
     fetchAttendances();
     fetchEmployees();
@@ -71,7 +98,7 @@ export default function AttendancePage() {
         params: {
           page: currentPage,
           employee_name: filters.employee_name,
-          department_name: filters.department_name,
+          department: filters.department,
           date: filters.date || checkOutFormData.date,
         },
       });
@@ -79,7 +106,11 @@ export default function AttendancePage() {
       setCurrentPage(response.data.current_page);
       setLastPage(response.data.last_page);
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to fetch attendances", { position: "bottom-end" });
+      toast.error(error.response?.data?.error || "Failed to fetch attendances", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "fetch-attendances-error",
+      });
     } finally {
       setLoading(false);
     }
@@ -88,10 +119,20 @@ export default function AttendancePage() {
   const fetchEmployees = async () => {
     try {
       const response = await api.get("/employees");
-      setEmployees(Array.isArray(response.data.data) ? response.data.data : response.data);
+      const employeeData = Array.isArray(response.data.data) ? response.data.data : response.data;
+      setEmployees(employeeData);
     } catch (error) {
-      toast.error("Failed to fetch employees", { position: "bottom-end" });
+      toast.error("Failed to fetch employees", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "fetch-employees-error",
+      });
     }
+  };
+
+  const getFullName = (employee) => {
+    if (!employee) return 'N/A';
+    return employee.full_name || `${employee.first_name || ''} ${employee.last_name || ''}`.trim() || 'N/A';
   };
 
   const handleCheckIn = async (e) => {
@@ -100,17 +141,21 @@ export default function AttendancePage() {
     try {
       const response = await api.post("/attendances/check-in", checkInFormData);
       const employeeObj = employees.find(emp => emp.id === Number(checkInFormData.employee_id));
+      if (!employeeObj) {
+        throw new Error("Employee not found");
+      }
       const attendanceWithEmployee = {
         ...response.data.attendance,
         employee: {
           id: employeeObj.id,
-          full_name: employeeObj.full_name,
-          first_name: employeeObj.first_name,
-          last_name: employeeObj.last_name,
-          dept_name: employeeObj.dept_name,
-          profile_picture_url: employeeObj.profile_image_url,
-          email: employeeObj.email,
-        }
+          full_name: employeeObj.full_name || `${employeeObj.first_name} ${employeeObj.last_name}`,
+          first_name: employeeObj.first_name || '',
+          last_name: employeeObj.last_name || '',
+          dept_name: employeeObj.department?.dept_name || 'N/A',
+          profile_picture_url: employeeObj.profile_picture || 'default.png',
+          email: employeeObj.email || 'N/A',
+          department: employeeObj.department || {},
+        },
       };
 
       setAttendances(prevAttendances => {
@@ -129,9 +174,17 @@ export default function AttendancePage() {
 
       await fetchAttendances();
       setCheckInFormData({ employee_id: "", date: "", checkInTime: "" });
-      toast.success("Check-in recorded successfully", { position: "bottom-end" });
+      toast.success("Check-in recorded successfully", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "check-in-success",
+      });
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to record check-in", { position: "bottom-end" });
+      toast.error(error.response?.data?.error || "Failed to record check-in", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "check-in-error",
+      });
     } finally {
       setLoading(false);
     }
@@ -143,17 +196,21 @@ export default function AttendancePage() {
     try {
       const response = await api.post("/attendances/check-out", checkOutFormData);
       const employeeObj = employees.find(emp => emp.id === Number(checkOutFormData.employee_id));
+      if (!employeeObj) {
+        throw new Error("Employee not found");
+      }
       const attendanceWithEmployee = {
         ...response.data.attendance,
         employee: {
           id: employeeObj.id,
-          full_name: employeeObj.full_name,
-          first_name: employeeObj.first_name,
-          last_name: employeeObj.last_name,
-          dept_name: employeeObj.dept_name,
-          profile_picture_url: employeeObj.profile_image_url,
-          email: employeeObj.email,
-        }
+          full_name: employeeObj.full_name || `${employeeObj.first_name} ${employeeObj.last_name}`,
+          first_name: employeeObj.first_name || '',
+          last_name: employeeObj.last_name || '',
+          dept_name: employeeObj.department?.dept_name || 'N/A',
+          profile_picture_url: employeeObj.profile_picture || 'default.png',
+          email: employeeObj.email || 'N/A',
+          department: employeeObj.department || {},
+        },
       };
 
       setAttendances(prevAttendances =>
@@ -166,9 +223,17 @@ export default function AttendancePage() {
 
       await fetchAttendances();
       setCheckOutFormData({ employee_id: "", date: "", checkOutTime: "" });
-      toast.success("Check-out recorded successfully", { position: "bottom-end" });
+      toast.success("Check-out recorded successfully", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "check-out-success",
+      });
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to record check-out", { position: "bottom-end" });
+      toast.error(error.response?.data?.error || "Failed to record check-out", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "check-out-error",
+      });
     } finally {
       setLoading(false);
     }
@@ -193,7 +258,8 @@ export default function AttendancePage() {
   const handleUpdateAttendance = async () => {
     setLoading(true);
     try {
-      const response = await api.put(`/attendances/${selectedAttendance.employee.id}`, editFormData);
+      const response = await api.put(`/attendances/${selectedAttendance.id}`, editFormData);
+
       setAttendances(prevAttendances =>
         prevAttendances.map(a =>
           a.id === selectedAttendance.id ? response.data.attendance : a
@@ -201,27 +267,55 @@ export default function AttendancePage() {
       );
       setShowEditModal(false);
       setEditFormData({ employee_id: "", date: "", checkInTime: "", checkOutTime: "" });
-      toast.success("Attendance updated successfully", { position: "bottom-end" });
+      toast.success("Attendance updated successfully", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "update-attendance-success",
+      });
       await fetchAttendances();
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to update attendance", { position: "bottom-end" });
+      toast.error(error.response?.data?.error || "Failed to update attendance", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "update-attendance-error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (attendance) => {
+    const employeeId = attendance.employee?.id;
+    const dateOnly = attendance.date?.split("T")[0];
+
+    if (!employeeId || !dateOnly) {
+      toast.error("Missing employee ID or date for deletion", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "delete-attendance-error",
+      });
+      return;
+    }
+
     if (window.confirm("Are you sure you want to delete this attendance record?")) {
       setLoading(true);
       try {
-        await api.delete(`/attendances/${attendance.employee.id}`, {
-          data: { date: attendance.date },
+        await api.delete(`/attendances/${employeeId}?date=${dateOnly}`);
+
+        setAttendances((prev) => prev.filter((a) => a.id !== attendance.id));
+        toast.success("Attendance deleted successfully", {
+          position: "top-right",
+          autoClose: 1000,
+          toastId: "delete-attendance-success",
         });
-        setAttendances(prevAttendances => prevAttendances.filter(a => a.id !== attendance.id));
-        toast.success("Attendance deleted successfully", { position: "bottom-end" });
+        await fetchEmployees();
         await fetchAttendances();
       } catch (error) {
-        toast.error(error.response?.data?.error || "Failed to delete attendance", { position: "bottom-end" });
+        toast.error(error.response?.data?.error || "Failed to delete attendance", {
+          position: "top-right",
+          autoClose: 1000,
+          toastId: "delete-attendance-error",
+        });
       } finally {
         setLoading(false);
       }
@@ -235,18 +329,22 @@ export default function AttendancePage() {
       head: [["Date", "Employee", "Department", "Check-In", "Check-Out", "Late(h)", "Overtime(h)", "Status"]],
       body: attendances.map((a) => [
         a.date,
-        a.employee.full_name,
-        a.employee.dept_name,
+        getFullName(a.employee),
+        a.employee?.department?.dept_name || 'N/A',
         a.checkInTime,
         a.checkOutTime,
-        a.lateDurationInHours,
-        a.overtimeDurationInHours,
+        Number(a.lateDurationInHours).toFixed(2),
+        Number(a.overtimeDurationInHours).toFixed(2),
         a.status,
       ]),
-      foot: [["", "", "", "", "Totals:", totalLateHours.toFixed(2), totalOvertimeHours.toFixed(2), ""]],
+      foot: [["", "", "", "", "Totals:", Number(totalLateHours).toFixed(2), Number(totalOvertimeHours).toFixed(2), ""]],
     });
     doc.save("attendance.pdf");
-    toast.success("PDF exported successfully", { position: "bottom-end" });
+    toast.success("PDF exported successfully", {
+      position: "top-right",
+      autoClose: 1000,
+      toastId: "export-pdf-success",
+    });
   };
 
   const exportSinglePDF = (employeeName, rows) => {
@@ -258,22 +356,22 @@ export default function AttendancePage() {
         a.date,
         a.checkInTime,
         a.checkOutTime,
-        a.lateDurationInHours,
-        a.overtimeDurationInHours,
+        Number(a.lateDurationInHours).toFixed(2),
+        Number(a.overtimeDurationInHours).toFixed(2),
         a.status,
       ]),
     });
     doc.save(`${employeeName.replace(/\s+/g, '_')}_attendance.pdf`);
   };
 
-  const totalLateHours = attendances.reduce((sum, a) => sum + (a.lateDurationInHours || 0), 0);
-  const totalOvertimeHours = attendances.reduce((sum, a) => sum + (a.overtimeDurationInHours || 0), 0);
+  const totalLateHours = attendances.reduce((sum, a) => sum + Number(a.lateDurationInHours || 0), 0);
+  const totalOvertimeHours = attendances.reduce((sum, a) => sum + Number(a.overtimeDurationInHours || 0), 0);
   const absenceMap = {};
   const presentCount = attendances.filter((a) => a.status === "Present").length;
   const absentCount = attendances.filter((a) => a.status === "Absent").length;
   attendances.forEach((a) => {
     if (a.status === "Absent") {
-      const key = a.employee.full_name;
+      const key = getFullName(a.employee);
       absenceMap[key] = (absenceMap[key] || 0) + 1;
     }
   });
@@ -299,15 +397,19 @@ export default function AttendancePage() {
             filename="attendance.csv"
             data={attendances.map((a) => ({
               date: a.date,
-              employee: a.employee.full_name,
-              department: a.employee.dept_name,
+              employee: getFullName(a.employee),
+              department: a.employee?.department?.dept_name || 'N/A',
               checkInTime: a.checkInTime,
               checkOutTime: a.checkOutTime,
-              lateDurationInHours: a.lateDurationInHours,
-              overtimeDurationInHours: a.overtimeDurationInHours,
+              lateDurationInHours: Number(a.lateDurationInHours).toFixed(2),
+              overtimeDurationInHours: Number(a.overtimeDurationInHours).toFixed(2),
               status: a.status,
             }))}
-            onClick={() => toast.success("CSV exported successfully", { position: "bottom-end" })}
+            onClick={() => toast.success("CSV exported successfully", {
+              position: "top-right",
+              autoClose: 1000,
+              toastId: "export-csv-success",
+            })}
           >
             <FaFileCsv /> CSV
           </CSVLink>
@@ -335,32 +437,54 @@ export default function AttendancePage() {
                   <option key={emp.id} value={emp.id}>
                     {emp.first_name && emp.last_name
                       ? `${emp.first_name} ${emp.last_name}`
-                      : emp.full_name}
+                      : getFullName(emp)}
                   </option>
                 ))}
               </select>
             </div>
             <div className="att-form-group">
               <label>Date</label>
-              <input
-                type="date"
-                value={checkInFormData.date}
-                onChange={(e) => setCheckInFormData({ ...checkInFormData, date: e.target.value })}
-                className="att-form-input"
-                required
-                disabled={loading}
-              />
+              <div className="att-input-with-icon">
+                <input
+                  type="date"
+                  value={checkInFormData.date}
+                  onChange={(e) => setCheckInFormData({ ...checkInFormData, date: e.target.value })}
+                  className="att-form-input"
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="att-icon-button"
+                  onClick={handleSetCurrentCheckInDate}
+                  disabled={loading}
+                  title="Set current date"
+                >
+                  <FaClock />
+                </button>
+              </div>
             </div>
             <div className="att-form-group">
               <label>Check-In Time</label>
-              <input
-                type="time"
-                value={checkInFormData.checkInTime}
-                onChange={(e) => setCheckInFormData({ ...checkInFormData, checkInTime: e.target.value })}
-                className="att-form-input"
-                required
-                disabled={loading}
-              />
+              <div className="att-input-with-icon">
+                <input
+                  type="time"
+                  value={checkInFormData.checkInTime}
+                  onChange={(e) => setCheckInFormData({ ...checkInFormData, checkInTime: e.target.value })}
+                  className="att-form-input"
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="att-icon-button"
+                  onClick={handleSetCurrentCheckInTime}
+                  disabled={loading}
+                  title="Set current time"
+                >
+                  <FaClock />
+                </button>
+              </div>
             </div>
             <button type="submit" className="att-form-button" disabled={loading}>
               Record Check-In
@@ -373,14 +497,25 @@ export default function AttendancePage() {
           <form onSubmit={handleCheckOut}>
             <div className="att-form-group">
               <label>Date</label>
-              <input
-                type="date"
-                value={checkOutFormData.date}
-                onChange={(e) => setCheckOutFormData({ ...checkOutFormData, date: e.target.value, employee_id: "" })}
-                className="att-form-input"
-                required
-                disabled={loading}
-              />
+              <div className="att-input-with-icon">
+                <input
+                  type="date"
+                  value={checkOutFormData.date}
+                  onChange={(e) => setCheckOutFormData({ ...checkOutFormData, date: e.target.value, employee_id: "" })}
+                  className="att-form-input"
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="att-icon-button"
+                  onClick={handleSetCurrentCheckOutDate}
+                  disabled={loading}
+                  title="Set current date"
+                >
+                  <FaClock />
+                </button>
+              </div>
             </div>
             <div className="att-form-group">
               <label>Employee</label>
@@ -404,9 +539,7 @@ export default function AttendancePage() {
                     })
                     .map((a) => (
                       <option key={a.employee.id} value={a.employee.id}>
-                        {a.employee.first_name && a.employee.last_name
-                          ? `${a.employee.first_name} ${a.employee.last_name}`
-                          : a.employee.full_name}
+                        {getFullName(a.employee)}
                       </option>
                     ))}
                 {checkOutFormData.date &&
@@ -424,14 +557,25 @@ export default function AttendancePage() {
             </div>
             <div className="att-form-group">
               <label>Check-Out Time</label>
-              <input
-                type="time"
-                value={checkOutFormData.checkOutTime}
-                onChange={(e) => setCheckOutFormData({ ...checkOutFormData, checkOutTime: e.target.value })}
-                className="att-form-input"
-                required
-                disabled={loading}
-              />
+              <div className="att-input-with-icon">
+                <input
+                  type="time"
+                  value={checkOutFormData.checkOutTime}
+                  onChange={(e) => setCheckOutFormData({ ...checkOutFormData, checkOutTime: e.target.value })}
+                  className="att-form-input"
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="att-icon-button"
+                  onClick={handleSetCurrentCheckOutTime}
+                  disabled={loading}
+                  title="Set current time"
+                >
+                  <FaClock />
+                </button>
+              </div>
             </div>
             <button type="submit" className="att-form-button" disabled={loading}>
               Record Check-Out
@@ -454,11 +598,11 @@ export default function AttendancePage() {
           <div className="att-stats-container">
             <div className="att-stat-card">
               <p className="att-stat-label">Total Late Hours</p>
-              <h3 className="att-stat-value">{totalLateHours.toFixed(2)}h</h3>
+              <h3 className="att-stat-value">{Number(totalLateHours).toFixed(2)}h</h3>
             </div>
             <div className="att-stat-card">
               <p className="att-stat-label">Total Overtime Hours</p>
-              <h3 className="att-stat-value">{totalOvertimeHours.toFixed(2)}h</h3>
+              <h3 className="att-stat-value">{Number(totalOvertimeHours).toFixed(2)}h</h3>
             </div>
             <div className="att-stat-card att-chart-card">
               <h5 className="att-section-title">Attendance Status</h5>
@@ -499,8 +643,8 @@ export default function AttendancePage() {
               <label>Department</label>
               <input
                 type="text"
-                value={filters.department_name}
-                onChange={(e) => setFilters({ ...filters, department_name: e.target.value })}
+                value={filters.department}
+                onChange={(e) => setFilters({ ...filters, department: e.target.value })}
                 className="att-form-input"
                 placeholder="Enter department"
               />
@@ -538,7 +682,7 @@ export default function AttendancePage() {
                     <td>{idx + 1}</td>
                     <td>
                       <img
-                        src={`http://127.0.0.1:8000/storage/${a.employee.profile_picture_url}`}
+                        src={`http://127.0.0.1:8000/storage/${a.employee?.profile_picture_url || 'default.png'}`}
                         alt="avatar"
                         width="50"
                         height="50"
@@ -546,17 +690,17 @@ export default function AttendancePage() {
                       />
                       <span
                         className="att-employee-link"
-                        onClick={() => exportSinglePDF(a.employee.full_name, attendances.filter((x) => x.employee.full_name === a.employee.full_name))}
+                        onClick={() => exportSinglePDF(getFullName(a.employee), attendances.filter((x) => getFullName(x.employee) === getFullName(a.employee)))}
                       >
-                        {a.employee.full_name}
+                        {getFullName(a.employee)}
                       </span>
                     </td>
-                    <td>{a.employee.dept_name}</td>
-                    <td>{a.employee.email}</td>
+                    <td>{a.employee?.department?.dept_name || 'N/A'}</td>
+                    <td>{a.employee?.email || 'N/A'}</td>
                     <td>{a.checkInTime}</td>
                     <td>{a.checkOutTime}</td>
-                    <td>{a.lateDurationInHours}h</td>
-                    <td>{a.overtimeDurationInHours}h</td>
+                    <td>{Number(a.lateDurationInHours).toFixed(2)}h</td>
+                    <td>{Number(a.overtimeDurationInHours).toFixed(2)}h</td>
                     <td>{a.status}</td>
                     <td className="att-action-buttons">
                       <button
@@ -684,20 +828,20 @@ export default function AttendancePage() {
             {selectedAttendance && (
               <div className="att-details-content">
                 <img
-                  src={`http://127.0.0.1:8000/storage/${selectedAttendance.employee.profile_picture_url}`}
+                  src={`http://127.0.0.1:8000/storage/${selectedAttendance.employee?.profile_picture_url || 'default.png'}`}
                   alt="avatar"
                   width="100"
                   height="100"
                   className="att-employee-avatar"
                 />
-                <p><strong>Employee:</strong> {selectedAttendance.employee.full_name}</p>
-                <p><strong>Email:</strong> {selectedAttendance.employee.email}</p>
-                <p><strong>Department:</strong> {selectedAttendance.employee.dept_name}</p>
+                <p><strong>Employee:</strong> {getFullName(selectedAttendance.employee)}</p>
+                <p><strong>Email:</strong> {selectedAttendance.employee?.email || 'N/A'}</p>
+                <p><strong>Department:</strong> {selectedAttendance.employee?.department?.dept_name || 'N/A'}</p>
                 <p><strong>Date:</strong> {selectedAttendance.date}</p>
                 <p><strong>Check-In:</strong> {selectedAttendance.checkInTime}</p>
                 <p><strong>Check-Out:</strong> {selectedAttendance.checkOutTime}</p>
-                <p><strong>Late:</strong> {selectedAttendance.lateDurationInHours}h</p>
-                <p><strong>Overtime:</strong> {selectedAttendance.overtimeDurationInHours}h</p>
+                <p><strong>Late:</strong> {Number(selectedAttendance.lateDurationInHours).toFixed(2)}h</p>
+                <p><strong>Overtime:</strong> {Number(selectedAttendance.overtimeDurationInHours).toFixed(2)}h</p>
                 <p><strong>Status:</strong> {selectedAttendance.status}</p>
               </div>
             )}
@@ -711,4 +855,4 @@ export default function AttendancePage() {
       </div>
     </div>
   );
-}
+} 

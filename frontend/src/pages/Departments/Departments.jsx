@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { FaBuilding, FaEdit, FaTrash, FaPlus, FaUsers, FaCalculator, FaStar } from "react-icons/fa";
-import api from "../../api";
-import "./Department.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import api from "../../api";
+import "./Department.css";
+
+const Spinner = () => <div className="dept-spinner dept-small"></div>;
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState([]);
@@ -15,18 +17,26 @@ export default function DepartmentsPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [departmentToDelete, setDepartmentToDelete] = useState(null);
   const [expandedDepartment, setExpandedDepartment] = useState(null);
+  const [searchText, setSearchText] = useState("");
 
   const fetchDepartments = async () => {
     setLoading(true);
     try {
       const { data } = await api.get("/departments-with-employees");
-      console.log("API Response:", data); // Debug: Log the full API response
       const departmentsData = data.data || [];
       setDepartments(departmentsData);
-      toast.success("Departments loaded!", { position: "top-right", autoClose: 3000 });
+      toast.success("Departments loaded!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "departments-loaded"
+      });
     } catch (err) {
-      console.error("Error fetching departments:", err); // Debug: Log errors
-      toast.error("Failed to load departments!", { position: "top-right", autoClose: 3000 });
+      console.error("Error fetching departments:", err);
+      toast.error("Failed to load departments!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "fetch-error"
+      });
     } finally {
       setLoading(false);
     }
@@ -62,22 +72,38 @@ export default function DepartmentsPage() {
     try {
       if (!form.dept_name.trim()) {
         setFormError("Department name is required.");
-        toast.error("Department name is required!", { position: "top-right", autoClose: 3000 });
+        toast.error("Department name is required!", {
+          position: "top-right",
+          autoClose: 1000,
+          toastId: "form-error"
+        });
         return;
       }
       if (editDepartment) {
         await api.put(`/departments/${editDepartment.id}`, form);
-        toast.success("Department updated!", { position: "top-right", autoClose: 3000 });
+        toast.success("Department updated!", {
+          position: "top-right",
+          autoClose: 1000,
+          toastId: "update-success"
+        });
       } else {
         await api.post("/departments", form);
-        toast.success("Department created!", { position: "top-right", autoClose: 3000 });
+        toast.success("Department created!", {
+          position: "top-right",
+          autoClose: 1000,
+          toastId: "create-success"
+        });
       }
       fetchDepartments();
       handleCloseModal();
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Failed to save department!";
       setFormError(errorMsg);
-      toast.error(errorMsg, { position: "top-right", autoClose: 4000 });
+      toast.error(errorMsg, {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "save-error"
+      });
     } finally {
       setActionLoading(false);
     }
@@ -99,11 +125,19 @@ export default function DepartmentsPage() {
     setActionLoading(true);
     try {
       await api.delete(`/departments/${departmentToDelete.id}`);
-      toast.success("Department deleted!", { position: "top-right", autoClose: 3000 });
+      toast.success("Department deleted!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "delete-success"
+      });
       fetchDepartments();
       handleCloseConfirm();
     } catch {
-      toast.error("Failed to delete department!", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to delete department!", {
+        position: "top-right",
+        autoClose: 1000,
+        toastId: "delete-error"
+      });
       handleCloseConfirm();
     } finally {
       setActionLoading(false);
@@ -114,30 +148,30 @@ export default function DepartmentsPage() {
     setExpandedDepartment(expandedDepartment === departmentId ? null : departmentId);
   };
 
-  // Statistics calculations
   const totalDepartments = departments.length;
   const totalEmployees = departments.reduce((sum, dept) => sum + (dept.employees?.length || 0), 0);
   const avgEmployeesPerDept = totalDepartments > 0 ? (totalEmployees / totalDepartments).toFixed(1) : 0;
-  const largestDepartment = departments.reduce((max, dept) => 
-    (dept.employees?.length || 0) > (max.employees?.length || 0) ? dept : max, 
+  const largestDepartment = departments.reduce((max, dept) =>
+    (dept.employees?.length || 0) > (max.employees?.length || 0) ? dept : max,
     { dept_name: "None", employees: [] }
   );
 
-  // Format salary
   const formatSalary = (salary) => {
     if (!salary) return "N/A";
     return `$${Number(salary).toLocaleString()}`;
   };
 
-  // Format hire date
   const formatHireDate = (dateStr) => {
     if (!dateStr) return "N/A";
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
 
-  // Get selected department for table
   const selectedDepartment = departments.find(dept => dept.id === expandedDepartment);
+
+  const filteredDepartments = departments.filter(dept =>
+    dept.dept_name?.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   return (
     <div className="dept-page-wrapper">
@@ -149,7 +183,6 @@ export default function DepartmentsPage() {
         </div>
       </header>
 
-      {/* Statistics Section */}
       <div className="dept-stats-container">
         <div className="dept-stat-card">
           <FaBuilding className="dept-stat-icon" />
@@ -174,7 +207,6 @@ export default function DepartmentsPage() {
         </div>
       </div>
 
-      {/* Form Section */}
       <form onSubmit={handleSubmit} className="dept-form">
         <input
           type="text"
@@ -190,26 +222,37 @@ export default function DepartmentsPage() {
           className="dept-form-button"
           disabled={actionLoading}
         >
-          <FaPlus /> {editDepartment ? "Update" : "Add"} Department
+          {actionLoading ? <Spinner /> : <><FaPlus /> {editDepartment ? "Update" : "Add"} Department</>}
         </button>
       </form>
 
       {formError && <div className="dept-form-error">{formError}</div>}
 
-      {/* Department Cards Section */}
+      <form onSubmit={e => e.preventDefault()} style={{ margin: "1rem 0", display: "flex", gap: "1rem", alignItems: "center" }}>
+        <input
+          type="text"
+          className="dept-form-input"
+          placeholder="Search department by name..."
+          value={searchText}
+          onChange={e => setSearchText(e.target.value)}
+          style={{ maxWidth: 300 }}
+        />
+        <button type="button" className="dept-form-button" onClick={() => setSearchText("")}>Reset</button>
+      </form>
+
       {loading ? (
         <div className="dept-loading-container">
-          <div className="dept-spinner"></div>
+          <Spinner />
           <p>Loading departments...</p>
         </div>
-      ) : departments.length === 0 ? (
+      ) : filteredDepartments.length === 0 ? (
         <div className="dept-no-departments">
           <p>No departments found.</p>
         </div>
       ) : (
         <div className="dept-department-view">
           <div className="dept-department-grid">
-            {departments.map((department) => (
+            {filteredDepartments.map((department) => (
               <div key={department.id} className="dept-department-card">
                 <div className="dept-department-content">
                   <h4>{department.dept_name}</h4>
@@ -220,26 +263,14 @@ export default function DepartmentsPage() {
                       onClick={() => handleShowModal(department)}
                       disabled={actionLoading}
                     >
-                      {actionLoading && editDepartment?.id === department.id ? (
-                        <div className="dept-spinner dept-small"></div>
-                      ) : (
-                        <>
-                          <FaEdit /> Edit
-                        </>
-                      )}
+                      {actionLoading && editDepartment?.id === department.id ? <Spinner /> : <><FaEdit /> Edit</>}
                     </button>
                     <button
                       className="dept-action-button dept-delete"
                       onClick={() => handleShowConfirm(department)}
                       disabled={actionLoading}
                     >
-                      {actionLoading && departmentToDelete?.id === department.id ? (
-                        <div className="dept-spinner dept-small"></div>
-                      ) : (
-                        <>
-                          <FaTrash /> Delete
-                        </>
-                      )}
+                      {actionLoading && departmentToDelete?.id === department.id ? <Spinner /> : <><FaTrash /> Delete</>}
                     </button>
                     <button
                       className="dept-action-button dept-details"
@@ -256,7 +287,6 @@ export default function DepartmentsPage() {
         </div>
       )}
 
-      {/* Employee Table Section */}
       {expandedDepartment && selectedDepartment && (
         <div className="dept-employee-table-section">
           <h3 className="dept-employee-table-title">{selectedDepartment.dept_name} Employees</h3>
@@ -265,32 +295,29 @@ export default function DepartmentsPage() {
               <table className="dept-employee-table">
                 <thead>
                   <tr>
-                    <th className="dept-table-header">ID</th>
-                    <th className="dept-table-header">First Name</th>
-                    <th className="dept-table-header">Last Name</th>
-                    <th className="dept-table-header">Email</th>
-                    <th className="dept-table-header">Phone</th>
-                    <th className="dept-table-header">National ID</th>
-                    <th className="dept-table-header">Hire Date</th>
-                    <th className="dept-table-header">Salary</th>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>National ID</th>
+                    <th>Hire Date</th>
+                    <th>Salary</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedDepartment.employees.map((employee) => {
-                    console.log("Employee Data:", employee); // Debug: Log each employee object
-                    return (
-                      <tr key={employee.id} className="dept-table-row">
-                        <td className="dept-table-cell">{employee.id || "N/A"}</td>
-                        <td className="dept-table-cell">{employee.first_name || "N/A"}</td>
-                        <td className="dept-table-cell">{employee.last_name || "N/A"}</td>
-                        <td className="dept-table-cell">{employee.email || "N/A"}</td>
-                        <td className="dept-table-cell">{employee.phone || "N/A"}</td>
-                        <td className="dept-table-cell">{employee.national_id || "N/A"}</td>
-                        <td className="dept-table-cell">{formatHireDate(employee.hire_date)}</td>
-                        <td className="dept-table-cell">{formatSalary(employee.salary)}</td>
-                      </tr>
-                    );
-                  })}
+                  {selectedDepartment.employees.map((employee) => (
+                    <tr key={employee.id}>
+                      <td>{employee.id || "N/A"}</td>
+                      <td>{employee.first_name || "N/A"}</td>
+                      <td>{employee.last_name || "N/A"}</td>
+                      <td>{employee.email || "N/A"}</td>
+                      <td>{employee.phone || "N/A"}</td>
+                      <td>{employee.national_id || "N/A"}</td>
+                      <td>{formatHireDate(employee.hire_date)}</td>
+                      <td>{formatSalary(employee.salary)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -305,18 +332,13 @@ export default function DepartmentsPage() {
           <div className="dept-confirmation-card">
             <p>Are you sure you want to delete the department "{departmentToDelete?.dept_name}"?</p>
             <div className="dept-confirmation-actions">
-              <button
-                className="dept-action-button dept-secondary"
-                onClick={handleCloseConfirm}
-              >
-                Cancel
-              </button>
+              <button className="dept-action-button dept-secondary" onClick={handleCloseConfirm}>Cancel</button>
               <button
                 className="dept-action-button dept-danger"
                 onClick={handleDelete}
                 disabled={actionLoading}
               >
-                {actionLoading ? <div className="dept-spinner dept-small"></div> : "Confirm"}
+                {actionLoading ? <Spinner /> : "Confirm"}
               </button>
             </div>
           </div>
@@ -325,4 +347,3 @@ export default function DepartmentsPage() {
     </div>
   );
 }
-

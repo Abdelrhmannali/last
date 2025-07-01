@@ -3,11 +3,11 @@
 }
 
 .hol-page-wrapper {
-  padding: 1.5rem;
-  background-color: #f5f5f5;
+  padding: clamp(1rem, 3vw, 1.5rem);
   min-height: 100vh;
-  color: #333;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e6e6fa 100%);
   font-family: 'Inter', sans-serif;
+  color: #333;
 }
 
 .hol-header {
@@ -153,63 +153,72 @@
 }
 
 .hol-holiday-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1.5rem;
+  justify-content: flex-start;
 }
 
 .hol-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.hol-card.hol-current-month {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ccc;
+  border-radius: 22px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(172, 112, 198, 0.2);
   border-top: 4px solid #9b59b6;
+  min-width: 18rem;
+  padding: 0.8rem;
 }
 
 .hol-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .hol-content {
-  text-align: center workmanship;
+  text-align: center;
+  width: 100%;
 }
 
 .hol-content h4 {
   font-weight: 600;
-  font-size: clamp(1.1rem, 3vw, 1.3rem);
+  font-size: 1.2rem;
   color: #6b48a3;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
+  text-transform: capitalize;
 }
 
 .hol-content p {
-  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-  color: #555;
-  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.4rem;
 }
 
 .hol-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   justify-content: center;
+  margin-top: 0.5rem;
 }
 
 .hol-action-button {
-  padding: 0.5rem 1.25rem;
+  padding: 0.5rem 1rem;
   border: 1px solid #6b48a3;
   background: transparent;
   border-radius: 8px;
   color: #6b48a3;
-  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  transition: all 0.2s ease;
-  min-width: 90px;
+  gap: 0.3rem;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  justify-content: center;
 }
 
 .hol-action-button.hol-edit:hover {
@@ -218,40 +227,46 @@
 }
 
 .hol-action-button.hol-delete {
-  border-color: #e74c3c;
-  color: #e74c3c;
+  border-color: #ff6b6b;
+  color: #ff6b6b;
 }
 
 .hol-action-button.hol-delete:hover {
-  background: #e74c3c;
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.hol-action-button.hol-details:hover {
+  background: #6b48a3;
   color: #fff;
 }
 
 .hol-action-button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .hol-stats-container {
-  display: grid;
+ display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
   margin-bottom: 2rem;
 }
 
+ 
+
 .hol-stat-card {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #ccc;
+  border-top: 4px solid #9b59b6;
   border-radius: 22px;
-  padding: 0.8rem;
+  padding: 1rem;
   width: 300px;
   height: 200px;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 4px 10px rgba(172, 112, 198, 0.2);
-  border-top: 4px solid #9b59b6;
   min-width: 18rem;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .hol-stat-card:hover {
@@ -260,7 +275,7 @@
 }
 
 .hol-stat-icon {
-  font-size: 38px;
+  font-size: 2.8rem;
   color: #6b48a3;
   margin-bottom: 0.5rem;
 }
@@ -269,17 +284,19 @@
   font-size: 1.1rem;
   color: #6b48a3;
   margin-bottom: 0.4rem;
+  font-weight: 500;
 }
 
 .hol-stat-card h3 {
-  font-size: 2.5rem;
-  font-weight: 600;
+  font-size: 2.2rem;
+  font-weight: 700;
   color: #6b48a3;
+  margin-bottom: 0.4rem;
 }
 
 .hol-stat-subtext {
-  font-size: 1.1rem;
-  color: #6b48a3;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .hol-chart-card {
@@ -290,6 +307,15 @@
   font-size: 1.1rem;
   color: #6b48a3;
   margin-bottom: 0.15rem;
+}
+
+.recharts-wrapper {
+  position: relative !important;
+  cursor: default !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 147px !important;
+  max-width: 290px !important;
 }
 
 .hol-confirmation-overlay {
@@ -358,11 +384,13 @@
   }
 
   .hol-holiday-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    justify-content: center;
   }
 
   .hol-stats-container {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    justify-content: center;
   }
 
   .hol-chart-card {
@@ -385,25 +413,42 @@
   }
 
   .hol-holiday-grid {
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    justify-content: center;
   }
 
   .hol-card {
-    padding: 1.25rem;
+    width: 140px;
+    height: 140px;
+  }
+
+  .hol-content h4 {
+    font-size: 0.95rem;
+  }
+
+  .hol-content p {
+    font-size: 0.7rem;
+  }
+
+  .hol-action-button {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+    min-width: 60px;
   }
 
   .hol-stats-container {
-  grid-template-columns: 1fr;
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
 
   .hol-stat-card {
     width: 100%;
+    max-width: 300px;
     height: 160px;
   }
 
-  .hol-chart-card {
-    height: 180px !important;
+  .hol-stat-icon {
+    font-size: 1.5rem;
   }
 
   .hol-stat-card p {
@@ -411,11 +456,15 @@
   }
 
   .hol-stat-card h3 {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
   }
 
   .hol-stat-subtext {
     font-size: 0.8rem;
+  }
+
+  .hol-chart-card {
+    height: 180px !important;
   }
 }
 
@@ -433,7 +482,22 @@
   }
 
   .hol-card {
-    padding: 1rem;
+    width: 120px;
+    height: 120px;
+  }
+
+  .hol-content h4 {
+    font-size: 0.85rem;
+  }
+
+  .hol-content p {
+    font-size: 0.65rem;
+  }
+
+  .hol-action-button {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.6rem;
+    min-width: 50px;
   }
 
   .hol-stats-container {
@@ -442,11 +506,12 @@
 
   .hol-stat-card {
     width: 100%;
+    max-width: 300px;
     height: 140px;
   }
 
-  .hol-chart-card {
-    height: 160px !important;
+  .hol-stat-icon {
+    font-size: 1.3rem;
   }
 
   .hol-stat-card p {
@@ -454,11 +519,15 @@
   }
 
   .hol-stat-card h3 {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
   }
 
   .hol-stat-subtext {
     font-size: 0.7rem;
+  }
+
+  .hol-chart-card {
+    height: 160px !important;
   }
 
   .hol-confirmation-card {
