@@ -4,6 +4,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../../api";
 import "./Department.css";
+import { Table } from "react-bootstrap";
+
 
 const Spinner = () => <div className="dept-spinner dept-small"></div>;
 
@@ -291,36 +293,41 @@ export default function DepartmentsPage() {
         <div className="dept-employee-table-section">
           <h3 className="dept-employee-table-title">{selectedDepartment.dept_name} Employees</h3>
           {selectedDepartment.employees?.length > 0 ? (
-            <div className="dept-employee-table-container">
-              <table className="dept-employee-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>National ID</th>
-                    <th>Hire Date</th>
-                    <th>Salary</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedDepartment.employees.map((employee) => (
-                    <tr key={employee.id}>
-                      <td>{employee.id || "N/A"}</td>
-                      <td>{employee.first_name || "N/A"}</td>
-                      <td>{employee.last_name || "N/A"}</td>
-                      <td>{employee.email || "N/A"}</td>
-                      <td>{employee.phone || "N/A"}</td>
-                      <td>{employee.national_id || "N/A"}</td>
-                      <td>{formatHireDate(employee.hire_date)}</td>
-                      <td>{formatSalary(employee.salary)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="payroll-table-container mt-4">
+  <Table responsive hover className="payroll-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>National ID</th>
+        <th>Hire Date</th>
+        <th>Salary</th>
+      </tr>
+    </thead>
+    <tbody>
+      {selectedDepartment.employees.map((employee) => (
+        <tr key={employee.id}>
+          <td>{employee.id || "N/A"}</td>
+          <td>{employee.first_name || "N/A"}</td>
+          <td>{employee.last_name || "N/A"}</td>
+          <td>{employee.email || "N/A"}</td>
+          <td>{employee.phone || "N/A"}</td>
+          <td>{employee.national_id || "N/A"}</td>
+          <td>{formatHireDate(employee.hire_date)}</td>
+          <td>
+            <span className="payroll-badge payroll-salary">
+              {formatSalary(employee.salary)}
+            </span>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </Table>
+</div>
+
           ) : (
             <p className="dept-no-employees">No employees in this department</p>
           )}

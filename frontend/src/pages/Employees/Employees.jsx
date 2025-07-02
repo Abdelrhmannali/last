@@ -1,101 +1,93 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, Link, useSearchParams, Outlet } from "react-router-dom";
 import ShowEmployeeModal from "../../components/ShowEmployeeModal";
 import api from "../../api";
-import { useQueryClient } from "@tanstack/react-query";
 import "./Employee.css";
 
 export default function Employees() {
   const navigate = useNavigate();
   const [showModel, setShowModel] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [employees, setEmployees] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchText, setSearchText] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page")) || 1;
   const searchInputRef = useRef(null);
   const queryClient = useQueryClient();
-  const [searchText, setSearchText] = useState("");
 
+  /* ============ Queries ============ */
   const search = searchParams.get("query") || "";
-  const {
-    data: employeeData,
-    isLoading,
-    isError,
-    isFetching,
-  } = useQuery({
+  const { data: employeeData } = useQuery({
     queryKey: ["employees", page, search],
     queryFn: () =>
       api
         .get(`/employees?page=${page}${search ? `&search=${search}` : ""}`)
-        .then((res) => res.data),
+        .then((r) => r.data),
     keepPreviousData: true,
   });
 
-  const {
-    data: departmentsData,
-    isLoading: deptLoading,
-    isError: deptError,
-  } = useQuery({
+  const { data: departmentsData } = useQuery({
     queryKey: ["departments"],
-    queryFn: () => api.get("/departments").then((res) => res.data),
+    queryFn: () => api.get("/departments").then((r) => r.data),
   });
 
   useEffect(() => {
     if (employeeData?.last_page) setTotalPages(employeeData.last_page);
   }, [employeeData]);
 
+  /* ============ Handlers ============ */
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this employee?")) {
       try {
         await api.delete(`/employees/${id}`);
         queryClient.invalidateQueries(["employees"]);
-        setEmployees([]);
-      } catch (error) {
+      } catch {
         alert("Failed to delete employee");
       }
     }
   };
 
   const handleEdit = (id) => navigate(`/employees/edit/${id}`);
-
-  const handleShow = (employee) => {
-    setSelectedEmployee(employee);
+  const handleShow = (emp) => {
+    setSelectedEmployee(emp);
     setShowModel(true);
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const query = searchInputRef.current?.value.trim().toLowerCase();
-    if (!query) return;
-    setSearchParams({ page: 1, query }); // أضف الكلمة للـ URL
+    const q = searchInputRef.current?.value.trim().toLowerCase();
+    if (!q) return;
+    setSearchParams({ page: 1, query: q });
   };
 
   const handleReset = () => {
     setSearchText("");
-    if (searchInputRef.current) searchInputRef.current.value = "";
+    searchInputRef.current && (searchInputRef.current.value = "");
   };
 
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  /* ============ Today Counter ============ */
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
 
-  const endOfToday = new Date(startOfToday);
-  endOfToday.setDate(endOfToday.getDate() + 1);
+  const todayNewEmployees =
+    (employeeData?.data || []).filter((e) => {
+      const d = e.created_at && new Date(e.created_at);
+      return d && d >= start && d < end;
+    }).length || 0;
 
-  const todayNewEmployees = (employeeData?.data || []).filter((emp) => {
-    if (!emp.created_at) return false;
-    const createdAt = new Date(emp.created_at);
-    return createdAt >= startOfToday && createdAt < endOfToday;
-  }).length;
-
-  const list = (employeeData?.data || []).filter(emp =>
-    `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(searchText.toLowerCase())
+  /* ============ Table Filter ============ */
+  const list = (employeeData?.data || []).filter((e) =>
+    `${e.first_name} ${e.last_name}`
+      .toLowerCase()
+      .includes(searchText.toLowerCase())
   );
 
   return (
     <div className="employee-page-wrapper">
-      {/* Header and Search Form */}
+      {/* -------- Header & Search -------- */}
       <div className="employee-header">
         <div className="row align-items-start mb-4">
           <div className="col-12 col-md-6 mb-3 mb-md-0">
@@ -106,6 +98,7 @@ export default function Employees() {
               <h2>Employees</h2>
             </div>
           </div>
+
           <div className="col-12 col-md-6">
             <form className="employee-form d-flex" onSubmit={handleSearch}>
               <input
@@ -114,13 +107,13 @@ export default function Employees() {
                 type="search"
                 placeholder="Search by name..."
                 value={searchText}
-                onChange={e => setSearchText(e.target.value)}
+                onChange={(e) => setSearchText(e.target.value)}
               />
-              <button className="employee-form-button" type="submit">
+              <button className="employee-form-button btn-small" type="submit">
                 Search
               </button>
               <button
-                className="employee-form-button ms-2"
+                className="employee-form-button btn-small ms-2"
                 type="button"
                 onClick={handleReset}
               >
@@ -131,24 +124,19 @@ export default function Employees() {
         </div>
       </div>
 
-      {/* Cards */}
+      {/* -------- Stat Cards -------- */}
       <div className="mb-4 d-flex flex-wrap gap-3 justify-content-between align-items-start">
-        {/* Total Employees */}
+        {/* total employees */}
         <div
           className="card text-dark employee-stat-card"
-          style={{
-            minWidth: "18rem",
-            borderRadius: "20px",
-            flex: "1 1 auto",
-            borderTop: "4px solid #ac70c6",
-          }}
+          style={{ borderTop: "4px solid #ac70c6" }}
         >
           <div className="card-body d-flex flex-column align-items-start">
             <div className="d-flex align-items-center mb-2">
               <i
                 className="fa-solid fa-circle-user fa-3x me-3"
                 style={{ color: "#6b48a3" }}
-              ></i>
+              />
               <div>
                 <p className="mb-1 fw-semibold text-muted">Total Employees</p>
                 <h5 className="card-title mb-0" style={{ color: "#ac70c6" }}>
@@ -162,22 +150,17 @@ export default function Employees() {
           </div>
         </div>
 
-        {/* Total Departments */}
+        {/* total departments */}
         <div
           className="card text-dark employee-stat-card"
-          style={{
-            minWidth: "18rem",
-            borderRadius: "20px",
-            flex: "1 1 auto",
-            borderTop: "4px solid #9b59b6",
-          }}
+          style={{ borderTop: "4px solid #9b59b6" }}
         >
           <div className="card-body d-flex flex-column align-items-start">
             <div className="d-flex align-items-center mb-2">
               <i
                 className="fa-solid fa-building fa-3x me-3"
                 style={{ color: "#6b48a3" }}
-              ></i>
+              />
               <div>
                 <p className="mb-1 fw-semibold text-muted">Total Departments</p>
                 <h5 className="card-title mb-0" style={{ color: "#9b59b6" }}>
@@ -187,27 +170,21 @@ export default function Employees() {
             </div>
             <p className="card-text small text-muted text-center w-100 mt-2">
               Number of departments in the system
- resize: vertical;
             </p>
           </div>
         </div>
 
-        {/* New Employees Today */}
+        {/* new today */}
         <div
           className="card text-dark employee-stat-card"
-          style={{
-            minWidth: "18rem",
-            borderRadius: "20px",
-            flex: "1 1 auto",
-            borderTop: "4px solid #8e44ad",
-          }}
+          style={{ borderTop: "4px solid #8e44ad" }}
         >
           <div className="card-body d-flex flex-column align-items-start">
             <div className="d-flex align-items-center mb-2">
               <i
                 className="fa-solid fa-user-plus fa-3x me-3"
                 style={{ color: "#6b48a3" }}
-              ></i>
+              />
               <div>
                 <p className="mb-1 fw-semibold text-muted">New Today</p>
                 <h5 className="card-title mb-0" style={{ color: "#8e44ad" }}>
@@ -222,7 +199,7 @@ export default function Employees() {
         </div>
       </div>
 
-      {/* Add Employee Button */}
+      {/* -------- Add Employee -------- */}
       <div className="mt-3">
         <Link to="/employees/add">
           <button className="employee-form-button">
@@ -231,12 +208,12 @@ export default function Employees() {
         </Link>
       </div>
 
-      {/* Table (Unchanged) */}
+      {/* -------- Employee Table -------- */}
       <table
         className="table table-light ps-5 mt-4"
         style={{
           borderRadius: "30px",
-          boxShadow: "0 4px 10px rgba(172, 112, 198, 0.1)",
+          boxShadow: "0 4px 10px rgba(172,112,198,.1)",
         }}
       >
         <thead
@@ -246,12 +223,12 @@ export default function Employees() {
           }}
         >
           <tr>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>#</th>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>Name</th>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>Department</th>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>Email</th>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>Phone</th>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>Actions</th>
+            <th style={{ color: "#ac70c6", fontWeight: 600 }}>#</th>
+            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Name</th>
+            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Department</th>
+            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Email</th>
+            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Phone</th>
+            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -297,7 +274,7 @@ export default function Employees() {
         </tbody>
       </table>
 
-      {/* Pagination */}
+      {/* -------- Pagination -------- */}
       <div className="d-flex justify-content-center flex-wrap mt-4">
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
           <button
@@ -315,13 +292,12 @@ export default function Employees() {
         ))}
       </div>
 
-      {/* Modal */}
+      {/* -------- Modal -------- */}
       <ShowEmployeeModal
         show={showModel}
         onHide={() => setShowModel(false)}
         employee={selectedEmployee}
       />
-
       <Outlet />
     </div>
   );

@@ -49,13 +49,17 @@ class AttendenceController extends Controller
                 'lateDurationInHours' => round((float) $attendance->lateDurationInHours, 2),
                 'overtimeDurationInHours' => round((float) $attendance->overtimeDurationInHours, 2),
                 'status' => $attendance->status,
-                'employee' => [
+                'employee' => $attendance->employee ? [
                     'id' => $attendance->employee->id,
-                    'full_name' => $attendance->employee->full_name,
-                    'profile_picture_url' => $attendance->employee->profile_image_url,
+                    'first_name' => $attendance->employee->first_name,
+                    'last_name' => $attendance->employee->last_name,
+                    'full_name' => $attendance->employee->first_name . ' ' . $attendance->employee->last_name,
                     'email' => $attendance->employee->email,
-                    'dept_name' => $attendance->employee->department ? $attendance->employee->department->dept_name : null,
-                ]
+                    'department' => $attendance->employee->department ? [
+                        'id' => $attendance->employee->department->id,
+                        'dept_name' => $attendance->employee->department->dept_name,
+                    ] : null,
+                ] : null,
             ];
         });
 
@@ -390,4 +394,31 @@ public function destroy(Request $request, $employee_id)
 
         return $defaultTime->diffInMinutes($actualTime) / 60;
     }
+    public function markAbsentees()
+{
+    // منطق تحديد الغياب
+    $today = now()->toDateString();
+    $employees = Employee::all();
+
+    foreach ($employees as $employee) {
+        $alreadyMarked = Attendence::where('employee_id', $employee->id)
+            ->whereDate('date', $today)
+            ->exists();
+
+        if (!$alreadyMarked) {
+            Attendence::create([
+                'employee_id' => $employee->id,
+                'date' => $today,
+                'status' => 'Absent',
+                'checkInTime' => null,
+                'checkOutTime' => null,
+                'lateDurationInHours' => 0,
+                'overtimeDurationInHours' => 0,
+            ]);
+        }
+    }
+
+    return response()->json(['message' => 'Absentees marked successfully']);
+}
+
 }

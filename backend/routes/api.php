@@ -13,6 +13,7 @@ use App\Http\Controllers\{
 };
 use App\Http\Controllers\Auth\PasswordResetController;
 
+
 Route::post('/hr/forgot-password', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/hr/reset-password', [PasswordResetController::class, 'reset']);
 
@@ -58,6 +59,10 @@ Route::delete('/attendances/{id}', [AttendenceController::class, 'destroy']);
 Route::post('/attendances/check-in', [AttendenceController::class, 'checkIn']);
 Route::post('/attendances/check-out', [AttendenceController::class, 'checkOut']);
 
+
+Route::post('/run-mark-absentees', [AttendenceController::class, 'markAbsentees']);
+
+
     // Payroll
     Route::prefix('payroll')->group(function () {
         Route::get('/show', [PayrollController::class, 'show']);
@@ -81,3 +86,5 @@ Route::get('/all-months', [PayrollController::class, 'getAllMonths']);
     Route::apiResource('departments', DepartmentController::class);
     Route::get('/departments-with-employees', [DepartmentController::class, 'departmentsWithEmployees']);
 });
+
+

@@ -57,7 +57,23 @@ export default function Sidebar() {
     <div className="hrsb-wrapper">
       <aside className={`hrsb-sidebar ${isSidebarOpen ? "hrsb-sidebar-open" : ""}`}>
         <div className="hrsb-sidebar-header">
-          <h4 className="hrsb-title">HR System</h4>
+     <h4 className="hrsb-title d-flex align-items-center gap-2">
+  <img
+    src="/src/assets/images/logo.png" 
+    alt="Pioneer Logo"
+    style={{
+      width: "48px",
+      height: "48px",
+      borderRadius: "50%",     // يخليها مدوّرة
+      objectFit: "cover",
+    }}
+  />
+  <span style={{ fontSize: "20px", fontWeight: "bold", whiteSpace: "nowrap" }}>
+    PIONEER HR
+  </span>
+</h4>
+
+
           <button className="hrsb-toggle-button" onClick={toggleSidebar}>
             {isSidebarOpen ? <FaTimes /> : <FaBars />}
           </button>

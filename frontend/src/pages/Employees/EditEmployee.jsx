@@ -1,4 +1,5 @@
-import React from "react";
+// src/pages/Employees/EditEmployee.jsx
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { useFormik } from "formik";
@@ -9,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./Employee.css";
 
 const Input = ({ label, name, type, formik }) => (
-  <div className="col-md-6">
+  <div className="col-md-6 mb-3">
     <label className="form-label">{label}</label>
     <input
       type={type}
@@ -32,38 +33,38 @@ export default function EditEmployee() {
   const { id } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [fileName, setFileName] = useState("No chosen file");
 
-  const {
-    data: emp,
-    isLoading: empLoading,
-    isError: empError,
-  } = useQuery({
+  const { data: emp, isError: empError } = useQuery({
     queryKey: ["employee", id],
     queryFn: () => api.get(`/employees/${id}`).then((r) => r.data),
   });
 
-  const {
-    data: departmentsData,
-    isLoading: depLoading,
-    isError: depError,
-  } = useQuery({
+  const { data: departmentsData, isError: depError } = useQuery({
     queryKey: ["departments"],
     queryFn: () => api.get("/departments").then((r) => r.data),
   });
+
+  useEffect(() => {
+    if (emp?.profile_picture) {
+      const originalFileName = emp.profile_picture.split("/").pop();
+      setFileName(originalFileName || "Current file");
+    }
+  }, [emp]);
 
   const schema = yup.object({
     first_name: yup
       .string()
       .required()
-      .matches(/^[a-zA-Z]{3,}$/i, "Min 3 letters"),
+      .matches(/^[a-zA-Z]{3,}$/, "Min 3 letters"),
     last_name: yup
       .string()
       .required()
-      .matches(/^[a-zA-Z]{3,}$/i, "Min 3 letters"),
+      .matches(/^[a-zA-Z]{3,}$/, "Min 3 letters"),
     email: yup.string().email().required(),
     phone: yup
       .string()
-      .matches(/^\d{11,15}$/)
+      .matches(/^\d{11,15}$/, "11‑15 digits")
       .required(),
     salary: yup.number().typeError("Number").min(0).required(),
     hire_date: yup.date().min("2008-01-01").required(),
@@ -77,12 +78,8 @@ export default function EditEmployee() {
       .date()
       .max(new Date(new Date().setFullYear(new Date().getFullYear() - 20)))
       .required(),
-    working_hours_per_day: yup
-      .number()
-      .typeError("Number")
-      .min(1)
-      .max(24)
-      .required(),
+    working_hours_per_day: yup.number().min(1).max(24).required(),
+    department_id: yup.number().required(),
   });
 
   const formik = useFormik({
@@ -114,9 +111,9 @@ export default function EditEmployee() {
     for (const [k, v] of Object.entries(values)) {
       if (k === "profile_picture") {
         if (v) fd.append("profile_picture", v);
-        continue;
+      } else {
+        fd.append(k, v ?? "");
       }
-      fd.append(k, v ?? "");
     }
     fd.append("_method", "PUT");
 
@@ -129,14 +126,15 @@ export default function EditEmployee() {
         navigate("/employees");
       })
       .catch((err) => {
-        if (err.response?.status === 422 && err.response.data.errors) {
-          formik.setErrors(err.response.data.errors);
-          toast.error("Validation errors");
-        } else toast.error("Update failed");
+        if (err.response?.status === 422) {
+          formik.setErrors(err.response.data.errors || {});
+          toast.error("Please fix validation errors.");
+        } else {
+          toast.error("Failed to update employee");
+        }
       });
   }
 
-  if (empLoading || depLoading) return <div>Loading…</div>;
   if (empError || depError)
     return <div className="alert alert-danger">Failed to load data</div>;
 
@@ -147,9 +145,8 @@ export default function EditEmployee() {
   return (
     <div className="employee-page-wrapper">
       <ToastContainer position="bottom-end" autoClose={3000} />
-
       <div className="employee-header">
-        <div className="employee-header-title">
+        <div className="employee-header-title ms-5">
           <span className="employee-header-icon">
             <i className="fa-solid fa-user-pen" />
           </span>
@@ -164,7 +161,9 @@ export default function EditEmployee() {
           encType="multipart/form-data"
         >
           <fieldset className="border p-3 mb-4 rounded">
-            <legend className="float-none w-auto px-3">Personal Information</legend>
+            <legend className="float-none w-auto px-3">
+              Personal Information
+            </legend>
             <div className="row g-3">
               <Input
                 label="First Name"
@@ -178,8 +177,8 @@ export default function EditEmployee() {
                 type="text"
                 formik={formik}
               />
-              <Input label="Email" name="email" type="text" formik={formik} />
-              <Input label="Phone" name="phone" type="text" formik={formik} />
+              <Input label="Email" name="email" type="email" formik={formik} />
+              <Input label="Phone" name="phone" type="tel" formik={formik} />
               <Input
                 label="Nationality"
                 name="nationality"
@@ -198,8 +197,7 @@ export default function EditEmployee() {
                 type="date"
                 formik={formik}
               />
-
-              <div className="col-md-6">
+              <div className="col-md-6 mb-3">
                 <label className="form-label">Gender</label>
                 <select
                   name="gender"
@@ -213,16 +211,20 @@ export default function EditEmployee() {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
-                  <option value="">Select</option>
-                  <option>Male</option>
-                  <option>Female</option>
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
                 </select>
                 {formik.touched.gender && formik.errors.gender && (
                   <div className="invalid-feedback">{formik.errors.gender}</div>
                 )}
               </div>
-
-              <Input label="Address" name="address" type="text" formik={formik} />
+              <Input
+                label="Address"
+                name="address"
+                type="text"
+                formik={formik}
+              />
             </div>
           </fieldset>
 
@@ -235,7 +237,12 @@ export default function EditEmployee() {
                 type="date"
                 formik={formik}
               />
-              <Input label="Salary" name="salary" type="number" formik={formik} />
+              <Input
+                label="Salary"
+                name="salary"
+                type="number"
+                formik={formik}
+              />
               <Input
                 label="Working Hours/Day"
                 name="working_hours_per_day"
@@ -243,19 +250,18 @@ export default function EditEmployee() {
                 formik={formik}
               />
               <Input
-                label="Check In"
+                label="Check In Time"
                 name="default_check_in_time"
                 type="time"
                 formik={formik}
               />
               <Input
-                label="Check Out"
+                label="Check Out Time"
                 name="default_check_out_time"
                 type="time"
                 formik={formik}
               />
-
-              <div className="col-md-6">
+              <div className="col-md-6 mb-3">
                 <label className="form-label">Department</label>
                 <select
                   name="department_id"
@@ -267,41 +273,45 @@ export default function EditEmployee() {
                   }
                   value={formik.values.department_id}
                   onChange={(e) =>
-                    formik.setFieldValue("department_id", Number(e.target.value))
+                    formik.setFieldValue(
+                      "department_id",
+                      Number(e.target.value)
+                    )
                   }
                   onBlur={formik.handleBlur}
                 >
-                  <option value="">Select</option>
+                  <option value="">Select Department</option>
                   {departments.map((d) => (
                     <option key={d.id} value={d.id}>
                       {d.dept_name}
                     </option>
                   ))}
                 </select>
-                {formik.touched.department_id && formik.errors.department_id && (
-                  <div className="invalid-feedback">
-                    {formik.errors.department_id}
-                  </div>
-                )}
+                {formik.touched.department_id &&
+                  formik.errors.department_id && (
+                    <div className="invalid-feedback">
+                      {formik.errors.department_id}
+                    </div>
+                  )}
               </div>
 
-              <div className="col-md-6">
+              {/* File Upload */}
+              <div className="col-md-6 mb-3">
                 <label className="form-label">Profile Picture</label>
                 <input
                   type="file"
-                  className="file-input"
+                  id="profile_picture" // ← مهم
                   name="profile_picture"
-                  id="profile_picture"
+                  className="file-input"
                   accept="image/*"
-                  onChange={(e) =>
-                    formik.setFieldValue(
-                      "profile_picture",
-                      e.currentTarget.files[0] || null
-                    )
-                  }
+                  onChange={(e) => {
+                    const file = e.currentTarget.files[0];
+                    formik.setFieldValue("profile_picture", file || null);
+                    setFileName(file ? file.name : "No chosen file");
+                  }}
                 />
                 <label htmlFor="profile_picture" className="custom-file-button">
-                  Choose File
+                  {fileName}
                 </label>
               </div>
             </div>

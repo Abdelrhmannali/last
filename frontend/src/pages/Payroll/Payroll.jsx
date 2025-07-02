@@ -124,9 +124,9 @@ export default function PayrollTable() {
 
   const averageSalary = employees.length
     ? (
-        employees.reduce((sum, e) => sum + parseFloat(e.net_salary || 0), 0) /
-        employees.length
-      ).toLocaleString()
+      employees.reduce((sum, e) => sum + parseFloat(e.net_salary || 0), 0) /
+      employees.length
+    ).toLocaleString()
     : 0;
 
   return (

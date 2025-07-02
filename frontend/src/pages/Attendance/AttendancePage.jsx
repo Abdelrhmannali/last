@@ -386,38 +386,65 @@ export default function AttendancePage() {
     <div className="att-page-wrapper">
       <ToastContainer position="bottom-end" className="p-3" autoClose={3000} />
       {loading && <div className="att-loading-overlay"><div className="att-spinner"></div></div>}
-      <header className="att-header">
-        <div className="att-header-title">
-          <FaClock className="att-header-icon" />
-          <h3>Attendance Records</h3>
-        </div>
-        <div className="att-header-actions">
-          <CSVLink
-            className="att-action-button att-csv-button"
-            filename="attendance.csv"
-            data={attendances.map((a) => ({
-              date: a.date,
-              employee: getFullName(a.employee),
-              department: a.employee?.department?.dept_name || 'N/A',
-              checkInTime: a.checkInTime,
-              checkOutTime: a.checkOutTime,
-              lateDurationInHours: Number(a.lateDurationInHours).toFixed(2),
-              overtimeDurationInHours: Number(a.overtimeDurationInHours).toFixed(2),
-              status: a.status,
-            }))}
-            onClick={() => toast.success("CSV exported successfully", {
-              position: "top-right",
-              autoClose: 1000,
-              toastId: "export-csv-success",
-            })}
-          >
-            <FaFileCsv /> CSV
-          </CSVLink>
-          <button className="att-action-button att-pdf-button" onClick={exportPDF}>
-            <FaFilePdf /> PDF
-          </button>
-        </div>
-      </header>
+   <header className="att-header">
+  <div className="att-header-title">
+    <FaClock className="att-header-icon" />
+    <h3>Attendance Records</h3>
+  </div>
+  <div className="att-header-actions">
+    <CSVLink
+      className="att-action-button att-csv-button"
+      filename="attendance.csv"
+      data={attendances.map((a) => ({
+        date: a.date,
+        employee: getFullName(a.employee),
+        department: a.employee?.department?.dept_name || 'N/A',
+        checkInTime: a.checkInTime,
+        checkOutTime: a.checkOutTime,
+        lateDurationInHours: Number(a.lateDurationInHours).toFixed(2),
+        overtimeDurationInHours: Number(a.overtimeDurationInHours).toFixed(2),
+        status: a.status,
+      }))}
+      onClick={() =>
+        toast.success("CSV exported successfully", {
+          position: "top-right",
+          autoClose: 1000,
+          toastId: "export-csv-success",
+        })
+      }
+    >
+      <FaFileCsv /> CSV
+    </CSVLink>
+
+    <button className="att-action-button att-pdf-button" onClick={exportPDF}>
+      <FaFilePdf /> PDF
+    </button>
+
+    <button
+      className="att-action-button att-absent-button"
+      onClick={async () => {
+        try {
+          await api.post("/run-mark-absentees");
+          toast.success("تم تحديث الغياب بنجاح", {
+            position: "top-right",
+            autoClose: 1000,
+            toastId: "absentees-marked",
+          });
+          await fetchAttendances();
+        } catch (error) {
+          toast.error("فشل في تحديث الغياب", {
+            position: "top-right",
+            autoClose: 1000,
+            toastId: "absentees-error",
+          });
+        }
+      }}
+    >
+      Mark Absentees
+    </button>
+  </div>
+</header>
+
 
       <div className="att-forms-container">
         <div className="att-form-card att-check-in-card">
@@ -681,13 +708,7 @@ export default function AttendancePage() {
                   <tr key={a.id} className={a.status === "Absent" ? "att-table-danger" : a.status === "Present" ? "att-table-success" : ""}>
                     <td>{idx + 1}</td>
                     <td>
-                      <img
-                        src={`http://127.0.0.1:8000/storage/${a.employee?.profile_picture_url || 'default.png'}`}
-                        alt="avatar"
-                        width="50"
-                        height="50"
-                        className="att-employee-avatar"
-                      />
+                     
                       <span
                         className="att-employee-link"
                         onClick={() => exportSinglePDF(getFullName(a.employee), attendances.filter((x) => getFullName(x.employee) === getFullName(a.employee)))}
@@ -827,13 +848,7 @@ export default function AttendancePage() {
           <div className="att-modal-body">
             {selectedAttendance && (
               <div className="att-details-content">
-                <img
-                  src={`http://127.0.0.1:8000/storage/${selectedAttendance.employee?.profile_picture_url || 'default.png'}`}
-                  alt="avatar"
-                  width="100"
-                  height="100"
-                  className="att-employee-avatar"
-                />
+               
                 <p><strong>Employee:</strong> {getFullName(selectedAttendance.employee)}</p>
                 <p><strong>Email:</strong> {selectedAttendance.employee?.email || 'N/A'}</p>
                 <p><strong>Department:</strong> {selectedAttendance.employee?.department?.dept_name || 'N/A'}</p>
