@@ -82,7 +82,7 @@ class AttendenceController extends Controller
         return response()->json(['error' => 'Employee settings not found'], 422);
     }
 
-    // ✅ بدون withTrashed علشان ما يسجلش لو كان اتحذف قبل كده
+ 
     $attendanceExists = Attendence::where('employee_id', $request->employee_id)
         ->whereDate('date', $date)
         ->exists();
@@ -190,7 +190,7 @@ public function destroy(Request $request, $employee_id)
 
     $month = $date->format('Y-m');
 
-    // 👇 حذف نهائي
+
     $attendance->forceDelete();
 
     try {
@@ -215,15 +215,15 @@ public function destroy(Request $request, $employee_id)
 
     if (!$employee->generalSetting) {
         Log::warning("No general settings found for employee {$employee->id}");
-        return response()->json(['error' => '❌ Employee settings not found'], 422);
+        return response()->json(['error' => ' Employee settings not found'], 422);
     }
 
     if ($date->isFuture()) {
-        return response()->json(['error' => '❌ Cannot check-in for a future date'], 422);
+        return response()->json(['error' => ' Cannot check-in for a future date'], 422);
     }
 
     if ($date->isPast() && !$date->isToday()) {
-        return response()->json(['error' => '❌ Cannot check-in for a past date'], 422);
+        return response()->json(['error' => ' Cannot check-in for a past date'], 422);
     }
 
     $weekendDays = $employee->generalSetting->weekend_days ?? ['Saturday', 'Sunday'];
@@ -233,23 +233,23 @@ public function destroy(Request $request, $employee_id)
     }
 
     if (in_array($date->englishDayOfWeek, $weekendDays)) {
-        return response()->json(['error' => '❌ Cannot check-in on a weekend day'], 422);
+        return response()->json(['error' => 'Cannot check-in on a weekend day'], 422);
     }
 
     if (Holiday::whereDate('date', $date)->exists()) {
-        return response()->json(['error' => '❌ Cannot check-in on an official holiday'], 422);
+        return response()->json(['error' => 'Cannot check-in on an official holiday'], 422);
     }
 
-    // ✅ تحقق فقط من الموجود حاليًا بدون withTrashed
+
     $attendanceExists = Attendence::where('employee_id', $request->employee_id)
         ->whereDate('date', $date)
         ->exists();
 
     if ($attendanceExists) {
-        return response()->json(['error' => '❌ Attendance already recorded for this date'], 422);
+        return response()->json(['error' => ' Attendance already recorded for this date'], 422);
     }
 
-    // ⬇️ تسجيل جديد
+
     $attendance = Attendence::create([
         'employee_id' => $request->employee_id,
         'date' => $date,
@@ -271,7 +271,7 @@ public function destroy(Request $request, $employee_id)
     }
 
     return response()->json([
-        'message' => '✅ Check-in recorded successfully',
+        'message' => 'Check-in recorded successfully',
         'attendance' => [
             'id' => $attendance->id,
             'date' => $attendance->date->toDateString(),
@@ -293,15 +293,15 @@ public function destroy(Request $request, $employee_id)
 
     if (!$employee->generalSetting) {
         Log::warning("No general settings found for employee {$employee->id}");
-        return response()->json(['error' => '❌ Employee settings not found'], 422);
+        return response()->json(['error' => ' Employee settings not found'], 422);
     }
 
     if ($date->isFuture()) {
-        return response()->json(['error' => '❌ Cannot check-out for a future date'], 422);
+        return response()->json(['error' => ' Cannot check-out for a future date'], 422);
     }
 
     if ($date->isPast() && !$date->isToday()) {
-        return response()->json(['error' => '❌ Cannot check-out for a past date'], 422);
+        return response()->json(['error' => ' Cannot check-out for a past date'], 422);
     }
 
     $weekendDays = $employee->generalSetting->weekend_days ?? ['Saturday', 'Sunday'];
@@ -311,31 +311,31 @@ public function destroy(Request $request, $employee_id)
     }
 
     if (in_array($date->englishDayOfWeek, $weekendDays)) {
-        return response()->json(['error' => '❌ Cannot check-out on a weekend day'], 422);
+        return response()->json(['error' => ' Cannot check-out on a weekend day'], 422);
     }
 
     if (Holiday::whereDate('date', $date)->exists()) {
-        return response()->json(['error' => '❌ Cannot check-out on an official holiday'], 422);
+        return response()->json(['error' => 'Cannot check-out on an official holiday'], 422);
     }
 
-    // ✅ بدون withTrashed
+
     $attendance = Attendence::where('employee_id', $request->employee_id)
         ->whereDate('date', $date)
         ->first();
 
     if (!$attendance) {
-        return response()->json(['error' => '❌ No check-in record found for this date'], 404);
+        return response()->json(['error' => ' No check-in record found for this date'], 404);
     }
 
     if ($attendance->checkOutTime) {
-        return response()->json(['error' => '❌ Check-out already recorded for this day'], 422);
+        return response()->json(['error' => ' Check-out already recorded for this day'], 422);
     }
 
     $actualCheckout = Carbon::parse($request->checkOutTime);
     $defaultCheckout = Carbon::parse($employee->default_check_out_time);
 
     if ($actualCheckout->gt($defaultCheckout->copy()->addHours(2))) {
-        return response()->json(['error' => '❌ Cannot check-out after the allowed time limit'], 422);
+        return response()->json(['error' => 'Cannot check-out after the allowed time limit'], 422);
     }
 
     $attendance->checkOutTime = $request->checkOutTime;
@@ -360,7 +360,7 @@ public function destroy(Request $request, $employee_id)
     }
 
     return response()->json([
-        'message' => '✅ Check-out recorded successfully',
+        'message' => 'Check-out recorded successfully',
         'attendance' => [
             'id' => $attendance->id,
             'date' => $attendance->date->toDateString(),
