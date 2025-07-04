@@ -1,13 +1,3 @@
-
-
-
-
-
-
-
-
-
-
 // HolidaysPage.js
 import React, { useEffect, useState } from "react";
 import {
@@ -194,7 +184,6 @@ export default function HolidaysPage() {
         </div>
       </header>
 
-      {/* ضع الفلتر هنا مباشرة بعد الهيدر */}
   
 
       {/* الإحصائيات */}

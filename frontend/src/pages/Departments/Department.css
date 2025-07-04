@@ -1,6 +1,11 @@
-.dept-page-wrapper {
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
- padding: clamp(1rem, 3vw, 1.5rem);
+.dept-page-wrapper {
+  padding: clamp(1rem, 3vw, 1.5rem);
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f5f5 0%, #e6e6fa 100%);
   font-family: 'Inter', sans-serif;
@@ -28,7 +33,7 @@
 
 .dept-header-icon {
   font-size: 1.6rem;
- color: #6b48a3;
+  color: #6b48a3;
 }
 
 .dept-form {
@@ -136,26 +141,26 @@
 }
 
 .dept-department-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
   justify-content: flex-start;
+  margin-top: 1rem;
 }
 
 .dept-department-card {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 300px;
-  height: 200px;
+  width: 250px;
+  height: 180px;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #ccc;
   border-radius: 22px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 10px rgba(172, 112, 198, 0.2);
   border-top: 4px solid #9b59b6;
-  min-width: 18rem;
-  padding: 0.8rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .dept-department-card:hover {
@@ -169,38 +174,37 @@
 }
 
 .dept-department-content h4 {
-  font-weight: 600;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
   color: #6b48a3;
-  margin-bottom: 0.4rem;
+  font-weight: 600;
   text-transform: capitalize;
 }
 
 .dept-department-content p {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
   color: #666;
-  margin-bottom: 0.4rem;
 }
 
 .dept-department-actions {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
-  margin-top: 0.5rem;
 }
 
 .dept-action-button {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.8rem;
   border: 1px solid #6b48a3;
   background: transparent;
   border-radius: 8px;
   color: #6b48a3;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
   gap: 0.3rem;
   transition: all 0.3s ease;
-  min-width: 80px;
+  min-width: 70px;
   justify-content: center;
 }
 
@@ -241,12 +245,11 @@
   border-top: 4px solid #9b59b6;
   border-radius: 22px;
   padding: 1rem;
-  width: 300px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 4px 10px rgba(172, 112, 198, 0.2);
-  min-width: 18rem;
   background: rgba(255, 255, 255, 0.9);
 }
 
@@ -434,8 +437,8 @@
   }
 
   .dept-department-card {
-    width: 140px;
-    height: 140px;
+    width: 200px;
+    height: 160px;
   }
 
   .dept-department-content h4 {
@@ -443,12 +446,12 @@
   }
 
   .dept-department-content p {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
   }
 
   .dept-action-button {
     font-size: 0.7rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0.4rem 0.6rem;
     min-width: 60px;
   }
 
@@ -500,21 +503,21 @@
 
 @media (max-width: 480px) {
   .dept-department-card {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 140px;
   }
 
   .dept-department-content h4 {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 
   .dept-department-content p {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
   }
 
   .dept-action-button {
     font-size: 0.65rem;
-    padding: 0.3rem 0.6rem;
+    padding: 0.3rem 0.5rem;
     min-width: 50px;
   }
 

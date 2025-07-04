@@ -1,5 +1,8 @@
+/******/
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 .hol-page-wrapper {
@@ -42,6 +45,7 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
 
 .hol-form-input {
@@ -153,26 +157,26 @@
 }
 
 .hol-holiday-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
   justify-content: flex-start;
+  margin-top: 1rem;
 }
 
 .hol-card {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 300px;
-  height: 200px;
+  width: 250px;
+  height: 180px;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #ccc;
   border-radius: 22px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 10px rgba(172, 112, 198, 0.2);
   border-top: 4px solid #9b59b6;
-  min-width: 18rem;
-  padding: 0.8rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .hol-card:hover {
@@ -186,38 +190,37 @@
 }
 
 .hol-content h4 {
-  font-weight: 600;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
   color: #6b48a3;
-  margin-bottom: 0.4rem;
+  font-weight: 600;
   text-transform: capitalize;
 }
 
 .hol-content p {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
   color: #666;
-  margin-bottom: 0.4rem;
 }
 
 .hol-actions {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
-  margin-top: 0.5rem;
 }
 
 .hol-action-button {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.8rem;
   border: 1px solid #6b48a3;
   background: transparent;
   border-radius: 8px;
   color: #6b48a3;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
   gap: 0.3rem;
   transition: all 0.3s ease;
-  min-width: 80px;
+  min-width: 70px;
   justify-content: center;
 }
 
@@ -247,25 +250,22 @@
 }
 
 .hol-stats-container {
- display: grid;
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
   margin-bottom: 2rem;
 }
 
- 
-
 .hol-stat-card {
   border-top: 4px solid #9b59b6;
   border-radius: 22px;
   padding: 1rem;
-  width: 300px;
-  height: 200px;
+  width: 100%;
+  height: 90%;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 4px 10px rgba(172, 112, 198, 0.2);
-  min-width: 18rem;
   background: rgba(255, 255, 255, 0.9);
 }
 
@@ -300,7 +300,9 @@
 }
 
 .hol-chart-card {
-  height: 200px !important;
+  width: 100%;
+  max-width: 300px;
+  height: 250px;
 }
 
 .hol-chart-card h3 {
@@ -418,8 +420,8 @@
   }
 
   .hol-card {
-    width: 140px;
-    height: 140px;
+    width: 200px;
+    height: 160px;
   }
 
   .hol-content h4 {
@@ -427,12 +429,12 @@
   }
 
   .hol-content p {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
   }
 
   .hol-action-button {
     font-size: 0.7rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0.4rem 0.6rem;
     min-width: 60px;
   }
 
@@ -482,21 +484,21 @@
   }
 
   .hol-card {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 140px;
   }
 
   .hol-content h4 {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 
   .hol-content p {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
   }
 
   .hol-action-button {
     font-size: 0.65rem;
-    padding: 0.3rem 0.6rem;
+    padding: 0.3rem 0.5rem;
     min-width: 50px;
   }
 
