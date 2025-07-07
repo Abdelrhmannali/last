@@ -142,16 +142,27 @@ const handleCheckboxChange = (day) => {
 
   const handleEdit = (setting) => {
     setEditSetting(setting);
+    let parsedWeekendDays = [];
+    if (typeof setting.weekend_days === 'string') {
+      try {
+        parsedWeekendDays = JSON.parse(setting.weekend_days);
+      } catch (e) {
+        console.error("Failed to parse weekend_days string:", e);
+        parsedWeekendDays = []; 
+      }
+    } else if (Array.isArray(setting.weekend_days)) {
+      parsedWeekendDays = setting.weekend_days;
+    }
+
     setForm({
       employee_id: String(setting.employee_id),
       deduction_type: setting.deduction_type,
       deduction_value: setting.deduction_value,
       overtime_type: setting.overtime_type,
       overtime_value: setting.overtime_value,
-     weekend_days: setting.weekend_days || [],
+      weekend_days: parsedWeekendDays, 
     });
   };
-
   const handleShowConfirm = (setting) => {
     setSettingToDelete(setting);
     setEditSetting(null);
