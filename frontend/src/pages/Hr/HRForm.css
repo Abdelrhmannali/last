@@ -51,12 +51,12 @@
 }
 
 .form-label {
-  font-weight: 500;
-  display: block;
-  margin-bottom: 0.4rem;
-  color: #333;
-  font-size: 0.9rem;
-}
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.4rem;
+    color: #9b59b6;
+    font-size: 1rem;
+    text-align: left;}
 
 .form-input {
   padding: 0.4rem 0.8rem;

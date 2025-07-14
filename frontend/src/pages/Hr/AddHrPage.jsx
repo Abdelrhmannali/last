@@ -82,7 +82,7 @@ export default function AddHrPage() {
           </Alert>
         )}
 
-        <Form onSubmit={handleSubmit} encType="multipart/form-data">
+        <Form onSubmit={handleSubmit} encType="multipart/form-data" autoComplete="off">
           <Form.Group className="mb-3">
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -92,6 +92,7 @@ export default function AddHrPage() {
               required
               placeholder="Enter name"
               className="form-input"
+              autoComplete="off"
             />
           </Form.Group>
 
@@ -105,6 +106,7 @@ export default function AddHrPage() {
               required
               placeholder="Enter email"
               className="form-input"
+              autoComplete="off"
             />
           </Form.Group>
 
@@ -114,11 +116,12 @@ export default function AddHrPage() {
               <Form.Control
                 name="password"
                 type={showPassword ? "text" : "password"}
-            
+                value={form.password}
                 onChange={handleChange}
                 required
                 placeholder="Enter password"
                 className="form-input"
+                autoComplete="new-password"
               />
               <span
                 className="toggle-password"
@@ -140,6 +143,7 @@ export default function AddHrPage() {
                 required
                 placeholder="Confirm password"
                 className="form-input"
+                autoComplete="new-password"
               />
               <span
                 className="toggle-password"
