@@ -1,3 +1,7 @@
+
+
+
+
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, Link, useSearchParams, Outlet } from "react-router-dom";
@@ -9,6 +13,8 @@ export default function Employees() {
   const navigate = useNavigate();
   const [showModel, setShowModel] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,14 +22,10 @@ export default function Employees() {
   const searchInputRef = useRef(null);
   const queryClient = useQueryClient();
 
-  /* ============ Queries ============ */
   const search = searchParams.get("query") || "";
   const { data: employeeData } = useQuery({
     queryKey: ["employees", page, search],
-    queryFn: () =>
-      api
-        .get(`/employees?page=${page}${search ? `&search=${search}` : ""}`)
-        .then((r) => r.data),
+    queryFn: () => api.get(`/employees?page=${page}${search ? `&search=${search}` : ""}`).then((r) => r.data),
     keepPreviousData: true,
   });
 
@@ -36,29 +38,33 @@ export default function Employees() {
     if (employeeData?.last_page) setTotalPages(employeeData.last_page);
   }, [employeeData]);
 
-  /* ============ Handlers ============ */
-  const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this employee?")) {
-      try {
-        await api.delete(`/employees/${id}`);
-        queryClient.invalidateQueries(["employees"]);
-      } catch {
-        alert("Failed to delete employee");
-      }
+  const handleDeleteClick = (emp) => {
+    setEmployeeToDelete(emp);
+  };
+
+  const confirmDelete = async () => {
+    if (!employeeToDelete) return;
+    setConfirmLoading(true);
+    try {
+      await api.delete(`/employees/${employeeToDelete.id}`);
+      queryClient.invalidateQueries(["employees"]);
+      setEmployeeToDelete(null);
+    } catch {
+      alert("Failed to delete employee");
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
+  const cancelDelete = () => {
+    setEmployeeToDelete(null);
+  };
+
   const handleEdit = (id) => navigate(`/employees/edit/${id}`);
+
   const handleShow = (emp) => {
     setSelectedEmployee(emp);
     setShowModel(true);
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const q = searchInputRef.current?.value.trim().toLowerCase();
-    if (!q) return;
-    setSearchParams({ page: 1, query: q });
   };
 
   const handleReset = () => {
@@ -66,23 +72,18 @@ export default function Employees() {
     searchInputRef.current && (searchInputRef.current.value = "");
   };
 
-  /* ============ Today Counter ============ */
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   const end = new Date(start);
   end.setDate(end.getDate() + 1);
 
-  const todayNewEmployees =
-    (employeeData?.data || []).filter((e) => {
-      const d = e.created_at && new Date(e.created_at);
-      return d && d >= start && d < end;
-    }).length || 0;
+  const todayNewEmployees = (employeeData?.data || []).filter((e) => {
+    const d = e.created_at && new Date(e.created_at);
+    return d && d >= start && d < end;
+  }).length || 0;
 
-  /* ============ Table Filter ============ */
   const list = (employeeData?.data || []).filter((e) =>
-    `${e.first_name} ${e.last_name}`
-      .toLowerCase()
-      .includes(searchText.toLowerCase())
+    `${e.first_name} ${e.last_name}`.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
@@ -98,9 +99,8 @@ export default function Employees() {
               <h2>Employees</h2>
             </div>
           </div>
-
           <div className="col-12 col-md-6">
-            <form className="employee-form d-flex" onSubmit={handleSearch}>
+            <form className="employee-form d-flex">
               <input
                 ref={searchInputRef}
                 className="employee-form-input form-control me-2 border-2"
@@ -109,9 +109,6 @@ export default function Employees() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />
-              <button className="employee-form-button btn-small" type="submit">
-                Search
-              </button>
               <button
                 className="employee-form-button btn-small ms-2"
                 type="button"
@@ -123,9 +120,7 @@ export default function Employees() {
           </div>
         </div>
       </div>
-
-      {/* -------- Stat Cards -------- */}
-      <div className="mb-4 d-flex flex-wrap gap-3 justify-content-between align-items-start">
+       <div className="mb-4 d-flex flex-wrap gap-3 justify-content-between align-items-start">
         {/* total employees */}
         <div
           className="card text-dark employee-stat-card"
@@ -209,70 +204,71 @@ export default function Employees() {
       </div>
 
       {/* -------- Employee Table -------- */}
-      <table
-        className="table table-light ps-5 mt-4"
-        style={{
-          borderRadius: "30px",
-          boxShadow: "0 4px 10px rgba(172,112,198,.1)",
-        }}
-      >
-        <thead
-          style={{
-            backgroundColor: "#f8f9fa",
-            borderBottom: "2px solid #6b48a3",
-          }}
-        >
-          <tr>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>#</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Name</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Department</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Email</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Phone</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list?.map((emp, idx) => (
-            <tr key={emp.id}>
-              <td>{idx + 1}</td>
-              <td>
-                <img
-                  src={`http://127.0.0.1:8000/storage/${emp.profile_picture}`}
-                  alt="avatar"
-                  width="50"
-                  height="50"
-                  className="rounded-circle me-2"
-                  style={{ border: "2px solid #6b48a3" }}
-                />
-                {emp.first_name} {emp.last_name}
-              </td>
-              <td>{emp.department?.dept_name ?? "-"}</td>
-              <td>{emp.email ?? "-"}</td>
-              <td>{emp.phone ?? "-"}</td>
-              <td>
-                <button
-                  className="employee-action-button view me-2"
-                  onClick={() => handleShow(emp)}
-                >
-                  <i className="fa-solid fa-eye" />
-                </button>
-                <button
-                  className="employee-action-button edit me-2"
-                  onClick={() => handleEdit(emp.id)}
-                >
-                  <i className="fa-solid fa-user-pen" />
-                </button>
-                <button
-                  className="employee-action-button delete"
-                  onClick={() => handleDelete(emp.id)}
-                >
-                  <i className="fa-solid fa-trash-can" />
-                </button>
-              </td>
+      <div className="table-responsive">
+        <table className="table table-light ps-5 mt-4 align-middle" style={{ borderRadius: "30px", boxShadow: "0 4px 10px rgba(172,112,198,.1)" }}>
+          <thead style={{ backgroundColor: "#f8f9fa", borderBottom: "2px solid #6b48a3" }}>
+            <tr>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>#</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Name</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Department</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Email</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Phone</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {list?.map((emp, idx) => (
+              <tr key={emp.id}>
+                <td>{idx + 1}</td>
+                <td>
+                  <img
+                    src={`http://127.0.0.1:8000/storage/${emp.profile_picture}`}
+                    alt="avatar"
+                    width="50"
+                    height="50"
+                    className="rounded-circle me-2"
+                    style={{ border: "2px solid #6b48a3" }}
+                  />
+                  {emp.first_name} {emp.last_name}
+                </td>
+                <td>{emp.department?.dept_name ?? "-"}</td>
+                <td>{emp.email ?? "-"}</td>
+                <td>{emp.phone ?? "-"}</td>
+                <td>
+                  <button className="employee-action-button view me-2" onClick={() => handleShow(emp)}>
+                    <i className="fa-solid fa-eye" />
+                  </button>
+                  <button className="employee-action-button edit me-2" onClick={() => handleEdit(emp.id)}>
+                    <i className="fa-solid fa-user-pen" />
+                  </button>
+                  <button className="employee-action-button delete" onClick={() => handleDeleteClick(emp)}>
+                    <i className="fa-solid fa-trash-can" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* -------- Confirmation Modal -------- */}
+      {employeeToDelete && (
+        <div className="hol-confirmation-overlay">
+          <div className="hol-confirmation-card">
+            <p>
+              Are you sure you want to delete employee "{employeeToDelete.first_name} {employeeToDelete.last_name}"?
+            </p>
+            <div className="hol-confirmation-actions">
+              <button className="hol-action-button hol-secondary" onClick={cancelDelete}>
+                Cancel
+              </button>
+              <button className="hol-action-button hol-danger" onClick={confirmDelete} disabled={confirmLoading}>
+                {confirmLoading ? "Deleting..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* -------- Pagination -------- */}
       <div className="d-flex justify-content-center flex-wrap mt-4">
@@ -280,11 +276,7 @@ export default function Employees() {
           <button
             key={p}
             className="employee-form-button mx-1"
-            style={{
-              backgroundColor: p === page ? "#ac70c6" : "transparent",
-              color: p === page ? "#fff" : "#ac70c6",
-              border: "2px solid #6b48a3",
-            }}
+            style={{ backgroundColor: p === page ? "#ac70c6" : "transparent", color: p === page ? "#fff" : "#ac70c6", border: "2px solid #6b48a3" }}
             onClick={() => setSearchParams({ page: p })}
           >
             {p}
@@ -292,12 +284,7 @@ export default function Employees() {
         ))}
       </div>
 
-      {/* -------- Modal -------- */}
-      <ShowEmployeeModal
-        show={showModel}
-        onHide={() => setShowModel(false)}
-        employee={selectedEmployee}
-      />
+      <ShowEmployeeModal show={showModel} onHide={() => setShowModel(false)} employee={selectedEmployee} />
       <Outlet />
     </div>
   );

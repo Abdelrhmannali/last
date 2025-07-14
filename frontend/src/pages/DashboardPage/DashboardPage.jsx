@@ -85,12 +85,12 @@ export default function DashboardPage() {
           : [];
         if (!employeesData.length) {
           console.warn("No employee data received");
-          toast.warn("No employee data available", { toastId: "no-employees" });
+       
         }
         setEmployees(employeesData);
       } catch (error) {
         console.error("Error fetching employees:", error);
-        toast.error("Failed to fetch employees", { toastId: "employees-error" });
+        
       }
 
       let departments = [];
@@ -133,12 +133,12 @@ export default function DashboardPage() {
           : [];
         if (!attendancesData.length) {
           console.warn("No attendance data received");
-          toast.warn("No attendance data available", { toastId: "no-attendances" });
+         
         }
         setAttendances(attendancesData);
       } catch (error) {
         console.error("Error fetching attendances:", error);
-        toast.error("Failed to fetch attendances", { toastId: "attendances-error" });
+       
       }
 
       let payroll = [];
@@ -284,11 +284,7 @@ export default function DashboardPage() {
       setRecentAttendances(filteredAttendances.slice(0, 5));
       setBarData(barChartData);
 
-      toast.success("Dashboard data loaded successfully!", {
-        position: "top-right",
-        autoClose: 1500,
-        toastId: "dashboard-loaded"
-      });
+   
     } catch (error) {
       console.error("Error in fetchDashboardData:", error);
       toast.error(error.response?.data?.error || "Failed to load dashboard data", {
@@ -503,75 +499,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="dash-charts-section">
-          <h4 className="dash-stats-group-title">Visual Analytics</h4>
-          <p className="dash-stats-description">
-            Visualize attendance and punctuality trends to make data-driven decisions.
-          </p>
-          <div className="dash-charts-container">
-            <div className="dash-chart-card">
-              {loading && <div className="dash-card-spinner" />}
-              <h3>Attendance Distribution</h3>
-              <ResponsiveContainer width="100%" height={320}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={90}
-                    outerRadius={130}
-                    fill="#4C51BF"
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={1000}
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: "rgba(255, 255, 255, 0.95)",
-                      border: "1px solid #E2E8F0",
-                      borderRadius: "12px",
-                      boxShadow: "0 6px 16px rgba(0, 0, 0, 0.1)",
-                      padding: "1rem",
-                    }}
-                    labelStyle={{ color: "#2D3748", fontWeight: 600 }}
-                  />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="dash-chart-card">
-              {loading && <div className="dash-card-spinner" />}
-              <h3>Late Hours by Department</h3>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={barData}>
-                  <CartesianGrid strokeDasharray="4 4" stroke="rgba(113, 128, 150, 0.2)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 14, fill: "#4A5568" }} angle={-45} textAnchor="end" />
-                  <YAxis tick={{ fontSize: 14, fill: "#4A5568" }} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "rgba(255, 255, 255, 0.95)",
-                      border: "1px solid #E2E8F0",
-                      borderRadius: "12px",
-                      boxShadow: "0 6px 16px rgba(0, 0, 0, 0.1)",
-                      padding: "1rem",
-                    }}
-                    labelStyle={{ color: "#2D3748", fontWeight: 600 }}
-                  />
-                  <Bar
-                    dataKey="lateHours"
-                    fill="#667EEA"
-                    radius={[8, 8, 0, 0]}
-                    animationDuration={1000}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+       
       </div>
     </div>
   );

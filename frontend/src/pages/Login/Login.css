@@ -1,4 +1,38 @@
 
+body {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.form-input {
+  font-size: 1rem;
+}
+
+label,
+.input-hint,
+.form-error,
+.form-success,
+.remember-row,
+.password-row,
+.forgot-link,
+.back-link {
+  font-size: 0.95rem;
+}
+
+.header-title h3 {
+  font-size: 2rem;
+}
+
+.form-button {
+  font-size: 1rem;
+}
+
+footer {
+  font-size: 0.9rem;
+}
+
+
+
 .login-page {
   height: 100vh;
   display: flex;
@@ -125,12 +159,13 @@
 }
 
 label {
-  font-weight: 500;
-  display: block;
-  margin-bottom: 0.4rem;
-  color: #333;
-  font-size: 0.9rem;
-  text-align: left;
+     font-weight: 700;
+    display: block;
+    margin-bottom: 0.4rem;
+    color: #9b59b6;
+    font-size: 1rem;
+    text-align: left;
+
 }
 
 .input-wrapper {

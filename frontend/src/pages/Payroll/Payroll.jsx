@@ -63,7 +63,6 @@ export default function PayrollTable() {
     }
   }, [fetchData, currentMonth]);
 
-  // جلب بيانات الموظفين (id, first_name, last_name, profile_picture)
   useEffect(() => {
     api
       .get("/employees?fields=id,first_name,last_name,profile_picture")
@@ -102,7 +101,7 @@ export default function PayrollTable() {
   );
 
   const getImageUrl = (emp) => {
-    // ابحث عن الموظف في allEmployees
+
     const found = allEmployees.find(
       (e) =>
         (emp.id && e.id === emp.id) ||
@@ -111,12 +110,12 @@ export default function PayrollTable() {
     );
     if (found && found.profile_picture)
       return `http://localhost:8000/storage/${found.profile_picture}`;
-    // إذا موجود في بيانات الـ Payroll
+ 
     if (emp.profile_image_url) return emp.profile_image_url;
     if (emp.profile_picture_url) return emp.profile_picture_url;
     if (emp.profile_picture)
       return `http://localhost:8000/storage/${emp.profile_picture}`;
-    // صورة افتراضية باسم الموظف
+
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(
       emp.employee_full_name || emp.full_name || emp.name || "User"
     )}&background=ac70c6&color=fff&rounded=true`;

@@ -37,7 +37,7 @@ public function withValidator($validator)
         if ($employee_id && $date) {
             $formattedDate = Carbon::parse($date)->format('Y-m-d');
 
-            $exists = DB::table('attendences') // ✅ غيّر الاسم لو جدولك اسمه attendances
+            $exists = DB::table('attendences') 
                 ->where('employee_id', $employee_id)
                 ->whereDate('date', $formattedDate)
                 ->exists();

@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Button, Row, Col, Badge } from "react-bootstrap";
-import "../pages/Employees/Employee.css"
+import "../pages/Employees/Employee.css";
 
 const Section = ({ title, icon, children }) => (
   <div
@@ -50,27 +50,15 @@ export default function ShowEmployeeModal({ show, onHide, employee }) {
       : "N/A";
 
   const weekend = () => {
-    try {
-      const raw = employee.general_setting_data?.weekend_days;
-      return raw ? JSON.parse(raw).join(", ") : "N/A";
-    } catch {
-      return "N/A";
-    }
+    
   };
 
   /* ---------- JSX ---------- */
   return (
-    <Modal
-      show={show}
-      onHide={onHide}
-      size="lg"
-      centered
-      scrollable 
-    >
-    
+    <Modal show={show} onHide={onHide} size="lg" centered scrollable>
       <Modal.Header
         style={{
-          backgroundColor: "#ac70c6",
+          backgroundColor: "#5a3d8c",
           color: "#fff",
           borderBottom: "none",
           display: "flex",
@@ -87,7 +75,6 @@ export default function ShowEmployeeModal({ show, onHide, employee }) {
           </Modal.Title>
         </div>
 
-      
         <Button
           variant="link"
           onClick={onHide}
@@ -171,12 +158,7 @@ export default function ShowEmployeeModal({ show, onHide, employee }) {
                   </span>
                 }
               />
-              <Item
-                label="Salary/hour"
-                value={`${parseFloat(
-                  employee.salary_per_hour || 0
-                ).toLocaleString()} EGP`}
-              />
+
               <Item label="Hire date" value={fmtDate(employee.hire_date)} />
               <Item
                 label="Working hrs/day"
@@ -190,58 +172,10 @@ export default function ShowEmployeeModal({ show, onHide, employee }) {
                 label="Check-out"
                 value={fmtTime(employee.default_check_out_time)}
               />
-              <Item label="Weekend" value={weekend()} />
+             
             </Section>
           </Col>
         </Row>
-
-        {/* ------ PAY SETTINGS (إن وُجدت) ------ */}
-        {employee.general_setting_data && (
-          <Row className="mt-4">
-            <Col>
-              <Section title="Pay Settings" icon="fas fa-cog">
-                <Row>
-                  <Col md={6}>
-                    <Item
-                      label="Deduction type"
-                      value={
-                        employee.general_setting_data.deduction_type === "money"
-                          ? "Fixed"
-                          : "Percent"
-                      }
-                    />
-                    <Item
-                      label="Deduction value"
-                      value={`${employee.general_setting_data.deduction_value}${
-                        employee.general_setting_data.deduction_type === "money"
-                          ? " EGP"
-                          : "%"
-                      }`}
-                    />
-                  </Col>
-                  <Col md={6}>
-                    <Item
-                      label="Overtime type"
-                      value={
-                        employee.general_setting_data.overtime_type === "money"
-                          ? "Fixed"
-                          : "Percent"
-                      }
-                    />
-                    <Item
-                      label="Overtime value"
-                      value={`${employee.general_setting_data.overtime_value}${
-                        employee.general_setting_data.overtime_type === "money"
-                          ? " EGP"
-                          : "%"
-                      }`}
-                    />
-                  </Col>
-                </Row>
-              </Section>
-            </Col>
-          </Row>
-        )}
       </Modal.Body>
 
       {/* ---------------- Footer ---------------- */}

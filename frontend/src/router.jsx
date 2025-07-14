@@ -23,7 +23,7 @@ import ForgotPassword from "./pages/Login/ForgotPassword";
 export default function RouterComponent() {
   return (
     <Routes>
-         <Route path="/" element={<LandingPage />} />
+         <Route path="/" element={<Login />} />
       <Route element={<Sidebar />}>
      
         <Route path="/holidays" element={<Holidayes />} />

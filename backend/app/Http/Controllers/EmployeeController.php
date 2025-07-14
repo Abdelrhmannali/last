@@ -226,21 +226,22 @@ class EmployeeController extends Controller
      * Delete an employee and their related records.
      * Send notification to employee's email before deletion.
      */
-    public function destroy($id)
+   
+     public function destroy($id)
     {
         $employee = Employee::findOrFail($id);
-
+ 
         try {
             // إرسال إشعار إلى بريد الموظف
             $employee->notify(new EmployeeActionNotification($employee, 'deleted'));
-
+ 
             // Delete profile picture if it exists
             if ($employee->profile_picture && Storage::disk('public')->exists($employee->profile_picture)) {
                 Storage::disk('public')->delete($employee->profile_picture);
             }
-
+ 
             $employee->delete();
-
+ 
             return response()->json([
                 'success' => true,
                 'message' => 'Employee and related records deleted successfully.'
@@ -252,6 +253,7 @@ class EmployeeController extends Controller
             ], 500);
         }
     }
+ 
 
     /**
      * Search for employees by name or national ID.

@@ -114,7 +114,7 @@ export default function AddHrPage() {
               <Form.Control
                 name="password"
                 type={showPassword ? "text" : "password"}
-                value={form.password}
+            
                 onChange={handleChange}
                 required
                 placeholder="Enter password"

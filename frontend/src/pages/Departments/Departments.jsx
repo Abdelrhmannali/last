@@ -27,11 +27,7 @@ export default function DepartmentsPage() {
       const { data } = await api.get("/departments-with-employees");
       const departmentsData = data.data || [];
       setDepartments(departmentsData);
-      toast.success("Departments loaded!", {
-        position: "top-right",
-        autoClose: 1000,
-        toastId: "departments-loaded"
-      });
+   
     } catch (err) {
       console.error("Error fetching departments:", err);
       toast.error("Failed to load departments!", {
@@ -293,18 +289,18 @@ export default function DepartmentsPage() {
         <div className="dept-employee-table-section">
           <h3 className="dept-employee-table-title">{selectedDepartment.dept_name} Employees</h3>
           {selectedDepartment.employees?.length > 0 ? (
-          <div className="payroll-table-container mt-4">
-  <Table responsive hover className="payroll-table">
+  <div className="payroll-table-container mt-4">
+  <Table responsive hover className="payroll-table align-middle">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>National ID</th>
-        <th>Hire Date</th>
-        <th>Salary</th>
+        <th style={{ color: "#ac70c6", fontWeight: 600 }}>ID</th>
+        <th style={{ color: "#ac70c6", fontWeight: 600 }}>First Name</th>
+        <th style={{ color: "#ac70c6", fontWeight: 600 }}>Last Name</th>
+        <th style={{ color: "#ac70c6", fontWeight: 600 }}>Email</th>
+        <th style={{ color: "#ac70c6", fontWeight: 600 }}>Phone</th>
+        <th style={{ color: "#ac70c6", fontWeight: 600 }}>National ID</th>
+        <th style={{ color: "#ac70c6", fontWeight: 600 }}>Hire Date</th>
+        <th style={{ color: "#ac70c6", fontWeight: 600 }}>Salary</th>
       </tr>
     </thead>
     <tbody>
@@ -330,7 +326,7 @@ export default function DepartmentsPage() {
 
           ) : (
             <p className="dept-no-employees">No employees in this department</p>
-          )}
+          )}x
         </div>
       )}
 

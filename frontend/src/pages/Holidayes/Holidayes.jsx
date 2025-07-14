@@ -1,14 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-// HolidaysPage.js
 import React, { useEffect, useState } from "react";
 import {
   FaCalendarPlus, FaEdit, FaTrash, FaCalendarAlt,
@@ -21,9 +10,9 @@ import "react-toastify/dist/ReactToastify.css";
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer
 } from "recharts";
-
+ 
 const Spinner = () => <div className="hol-spinner hol-small"></div>;
-
+ 
 export default function HolidaysPage() {
   const [holidays, setHolidays] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +22,7 @@ export default function HolidaysPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [holidayToDelete, setHolidayToDelete] = useState(null);
   const [filterDate, setFilterDate] = useState("");
-
+ 
   const formatDate = (dateStr) => {
     if (!dateStr) return "Not specified";
     const date = new Date(dateStr);
@@ -41,17 +30,13 @@ export default function HolidaysPage() {
       weekday: "short", day: "numeric", month: "short", year: "numeric"
     });
   };
-
+ 
   const fetchHolidays = async () => {
     setLoading(true);
     try {
       const { data } = await api.get("/holidays");
       setHolidays(data?.data || []);
-      toast.success("Holidays loaded!", {
-        position: "top-right",
-        autoClose: 1000,
-        toastId: "holidays-loaded"
-      });
+    
     } catch (error) {
       console.error("Fetch holidays error:", error);
       toast.error("Failed to load holidays!", {
@@ -63,20 +48,20 @@ export default function HolidaysPage() {
       setLoading(false);
     }
   };
-
+ 
   useEffect(() => {
     fetchHolidays();
   }, []);
-
+ 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
     setActionLoading(true);
-
+ 
     if (!form.name.trim() || !form.date) {
       setFormError("Holiday name and date are required.");
       toast.error("Holiday name and date are required!", {
@@ -87,7 +72,7 @@ export default function HolidaysPage() {
       setActionLoading(false);
       return;
     }
-
+ 
     try {
       if (editHoliday) {
         await api.put(`/holidays/${editHoliday.id}`, form);
@@ -118,18 +103,18 @@ export default function HolidaysPage() {
       setActionLoading(false);
     }
   };
-
+ 
   const handleShowConfirm = (holiday) => {
     setHolidayToDelete(holiday);
     setForm({ name: holiday.name, date: holiday.date });
     setEditHoliday(null);
   };
-
+ 
   const handleCloseConfirm = () => {
     setHolidayToDelete(null);
     setForm({ name: "", date: "" });
   };
-
+ 
   const handleDelete = async () => {
     if (!holidayToDelete) return;
     setActionLoading(true);
@@ -153,38 +138,47 @@ export default function HolidaysPage() {
       setActionLoading(false);
     }
   };
-
+ 
   const filteredHolidays = filterDate
-    ? holidays.filter(h => new Date(h.date).toISOString().split("T")[0] === filterDate)
+    ? holidays.filter(h => {
+        const holidayDate = new Date(h.date);
+        const selectedDate = new Date(filterDate);
+ 
+        return (
+          holidayDate.getFullYear() === selectedDate.getFullYear() &&
+          holidayDate.getMonth() === selectedDate.getMonth() &&
+          holidayDate.getDate() === selectedDate.getDate()
+        );
+      })
     : holidays;
-
-  const holidaysByMonth = holidays.reduce((acc, holiday) => {
+ 
+  const holidaysByMonth = filteredHolidays.reduce((acc, holiday) => {
     const month = new Date(holiday.date).toLocaleString("default", { month: "long", year: "numeric" });
     if (!acc[month]) acc[month] = [];
     acc[month].push(holiday);
     return acc;
   }, {});
-
-  const totalHolidays = holidays.length;
-  const holidaysPerMonth = Object.values(holidaysByMonth).map(h => h.length);
-  const avgHolidaysPerMonth = holidaysPerMonth.length > 0
-    ? (holidaysPerMonth.reduce((a, b) => a + b, 0) / holidaysPerMonth.length).toFixed(1)
+ 
+  const totalFilteredHolidays = filteredHolidays.length;
+  const filteredHolidaysPerMonth = Object.values(holidaysByMonth).map(h => h.length);
+  const avgFilteredHolidaysPerMonth = filteredHolidaysPerMonth.length > 0
+    ? (filteredHolidaysPerMonth.reduce((a, b) => a + b, 0) / filteredHolidaysPerMonth.length).toFixed(1)
     : 0;
-
+ 
   const pieData = Object.keys(holidaysByMonth).map(month => ({
     name: month,
     value: holidaysByMonth[month].length,
   }));
-
+ 
   const upcomingHoliday = holidays
     .filter(h => new Date(h.date) > new Date())
     .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
-
+ 
   const COLORS = ['#6b48a3', '#8b5db4', '#ac70c6', '#c495d8', '#dab4e8'];
-
+ 
   const now = new Date();
-
-    return (
+ 
+  return (
     <div className="hol-page-wrapper">
       <ToastContainer />
       <header className="hol-header">
@@ -193,21 +187,18 @@ export default function HolidaysPage() {
           <h2>Holidays</h2>
         </div>
       </header>
-
-      {/* ضع الفلتر هنا مباشرة بعد الهيدر */}
-  
-
-      {/* الإحصائيات */}
+ 
+      {/* Stats Section */}
       <div className="hol-stats-container">
         <div className="hol-stat-card">
           <FaChartPie className="hol-stat-icon" />
           <p>Total Holidays</p>
-          <h3>{totalHolidays.toLocaleString()}</h3>
+          <h3>{totalFilteredHolidays.toLocaleString()}</h3>
         </div>
         <div className="hol-stat-card">
           <FaCalculator className="hol-stat-icon" />
           <p>Average Holidays/Month</p>
-          <h3>{parseFloat(avgHolidaysPerMonth).toLocaleString(undefined, {
+          <h3>{parseFloat(avgFilteredHolidaysPerMonth).toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
           })}</h3>
@@ -250,8 +241,9 @@ export default function HolidaysPage() {
           </ResponsiveContainer>
         </div>
       </div>
-      
-
+     
+ 
+      {/* Add/Edit Holiday Form */}
       <form onSubmit={handleSubmit} className="hol-form">
         <input
           type="text"
@@ -278,7 +270,9 @@ export default function HolidaysPage() {
           <FaCalendarPlus /> {editHoliday ? "Update" : "Add"} Holiday
         </button>
       </form>
-    <form
+ 
+      {/* Filter by Date Form */}
+      <form
         onSubmit={e => e.preventDefault()}
         style={{ margin: "1rem 0", display: "flex", gap: "1rem", alignItems: "center" }}
       >
@@ -297,69 +291,62 @@ export default function HolidaysPage() {
           Reset
         </button>
       </form>
+ 
       {formError && <div className="hol-form-error">{formError}</div>}
-
+ 
+      {/* Holidays Display Section */}
       {loading ? (
         <div className="hol-spinner-wrapper"><Spinner /></div>
-      ) : filteredHolidays.length === 0 ? (
+      ) : Object.keys(holidaysByMonth).length === 0 ? (
         <div className="hol-no-holidays">
           <p>No holidays found.</p>
         </div>
       ) : (
         <div className="hol-calendar-view">
-          {Object.keys(
-            filteredHolidays.reduce((acc, holiday) => {
-              const month = new Date(holiday.date).toLocaleString("default", { month: "long", year: "numeric" });
-              if (!acc[month]) acc[month] = [];
-              acc[month].push(holiday);
-              return acc;
-            }, {})
-          ).map((month) => (
-            <div key={month} className="hol-month-section">
-              <h3 className="hol-month-title">{month}</h3>
-              <div className="hol-holiday-grid">
-                {filteredHolidays
-                  .filter(h => {
-                    const m = new Date(h.date).toLocaleString("default", { month: "long", year: "numeric" });
-                    return m === month;
-                  })
-                  .map((holiday) => {
-                    const isCurrentMonth = new Date(holiday.date).getMonth() === now.getMonth() &&
-                      new Date(holiday.date).getFullYear() === now.getFullYear();
-                    return (
-                      <div key={holiday.id} className={`hol-card ${isCurrentMonth ? 'hol-current-month' : ''}`}>
-                        <div className="hol-content">
-                          <h4>{holiday.name}</h4>
-                          <p>{formatDate(holiday.date)}</p>
-                          <div className="hol-actions">
-                            <button
-                              className="hol-action-button hol-edit"
-                              onClick={() => {
-                                setEditHoliday(holiday);
-                                setForm({ name: holiday.name, date: holiday.date });
-                              }}
-                              disabled={actionLoading}
-                            >
-                              {actionLoading && editHoliday?.id === holiday.id ? <Spinner /> : <><FaEdit /> Edit</>}
-                            </button>
-                            <button
-                              className="hol-action-button hol-delete"
-                              onClick={() => handleShowConfirm(holiday)}
-                              disabled={actionLoading}
-                            >
-                              {actionLoading && holidayToDelete?.id === holiday.id ? <Spinner /> : <><FaTrash /> Delete</>}
-                            </button>
+          {Object.keys(holidaysByMonth)
+            .map((month) => (
+              <div key={month} className="hol-month-section">
+                <h3 className="hol-month-title">{month}</h3>
+                <div className="hol-holiday-grid">
+                  {holidaysByMonth[month]
+                    .map((holiday) => {
+                      const isCurrentMonth = new Date(holiday.date).getMonth() === now.getMonth() &&
+                                           new Date(holiday.date).getFullYear() === now.getFullYear();
+                      return (
+                        <div key={holiday.id} className={`hol-card ${isCurrentMonth ? 'hol-current-month' : ''}`}>
+                          <div className="hol-content">
+                            <h4>{holiday.name}</h4>
+                            <p>{formatDate(holiday.date)}</p>
+                            <div className="hol-actions">
+                              <button
+                                className="hol-action-button hol-edit"
+                                onClick={() => {
+                                  setEditHoliday(holiday);
+                                  setForm({ name: holiday.name, date: holiday.date });
+                                }}
+                                disabled={actionLoading}
+                              >
+                                {actionLoading && editHoliday?.id === holiday.id ? <Spinner /> : <><FaEdit /> Edit</>}
+                              </button>
+                              <button
+                                className="hol-action-button hol-delete"
+                                onClick={() => handleShowConfirm(holiday)}
+                                disabled={actionLoading}
+                              >
+                                {actionLoading && holidayToDelete?.id === holiday.id ? <Spinner /> : <><FaTrash /> Delete</>}
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
-
+ 
+      {/* Delete Confirmation Modal */}
       {holidayToDelete && (
         <div className="hol-confirmation-overlay">
           <div className="hol-confirmation-card">
@@ -385,3 +372,4 @@ export default function HolidaysPage() {
     </div>
   );
 }
+ 

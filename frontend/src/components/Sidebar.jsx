@@ -17,20 +17,21 @@ import api from "../api";
 import "./Sidebar.css";
 
 export default function Sidebar() {
-  const [hr, setHr] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [hr, setHr] = useState(null); // Store HR user data
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar open/close state
   const navigate = useNavigate();
 
+  // Determine active link style
   const linkStyle = ({ isActive }) =>
     isActive ? "hrsb-nav-link active" : "hrsb-nav-link";
 
-
+  // Handle logout process
   const handleLogout = async () => {
     try {
       await api.post("/hr/logout");
       localStorage.removeItem("token");
 
-      // Prevent navigating back after logout
+      // Prevent back navigation after logout
       window.history.pushState(null, "", window.location.href);
       window.onpopstate = function () {
         window.history.go(1);
@@ -42,10 +43,12 @@ export default function Sidebar() {
     }
   };
 
+  // Toggle sidebar open/close
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  // Fetch HR user data on component mount
   useEffect(() => {
     api
       .get("/user")
@@ -55,34 +58,37 @@ export default function Sidebar() {
 
   return (
     <div className="hrsb-wrapper">
+      {/* Sidebar container */}
       <aside className={`hrsb-sidebar ${isSidebarOpen ? "hrsb-sidebar-open" : ""}`}>
         <div className="hrsb-sidebar-header">
-     <h4 className="hrsb-title d-flex align-items-center gap-2">
+          {/* Logo and title */}
+         
+                 <h4 className="hrsb-title">
   <img
-    src="/src/assets/images/logo.png" 
+    src="/src/assets/images/logo.png"
     alt="Pioneer Logo"
-    style={{
-      width: "48px",
-      height: "48px",
-      borderRadius: "50%",     // يخليها مدوّرة
-      objectFit: "cover",
-    }}
+    className="hrsb-logo"
+     style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%", // Make image round
+                objectFit: "cover",
+              }}
   />
-  <span style={{ fontSize: "20px", fontWeight: "bold", whiteSpace: "nowrap" }}>
-    PIONEER HR
-  </span>
+  <span className="hrsb-brand">PIONEER HR</span>
 </h4>
 
-
+          {/* Sidebar toggle button */}
           <button className="hrsb-toggle-button" onClick={toggleSidebar}>
             {isSidebarOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
 
+        {/* Navigation menu links */}
         <div className="hrsb-menu">
           <NavLink to="/dashboard" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
             <FaHome />
-            Home
+           Dashboard
           </NavLink>
           <NavLink to="/holidays" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
             <FaCalendarAlt />
@@ -120,7 +126,7 @@ export default function Sidebar() {
           </button>
         </div>
 
-        {/* HR profile info */}
+        {/* HR profile info link */}
         {hr && (
           <NavLink
             to="/updateHr"
@@ -141,13 +147,14 @@ export default function Sidebar() {
         )}
       </aside>
 
-      {/* Overlay for mobile */}
+      {/* Overlay shown on mobile when sidebar is open */}
       {isSidebarOpen && (
         <div className="hrsb-overlay" onClick={toggleSidebar}></div>
       )}
 
-      {/* Main content */}
+      {/* Main content area */}
       <main className="hrsb-main-content">
+        {/* Mobile toggle button */}
         <button className="hrsb-mobile-toggle" onClick={toggleSidebar}>
           <FaBars />
         </button>

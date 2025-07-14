@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Select from "react-select"; // ← NEW
 import api from "../../api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Employee.css";
 
+/* ----------------- reusable text/number input ----------------- */
 const Input = ({ label, name, type, formik, readOnly }) => (
   <div className="col-md-6 mb-3">
     <label className="form-label">{label}</label>
@@ -15,7 +17,7 @@ const Input = ({ label, name, type, formik, readOnly }) => (
       type={type}
       name={name}
       className={
-        "form-control employee-form-container" +
+        "form-control" +
         (formik.touched[name] && formik.errors[name] ? " is-invalid" : "")
       }
       value={formik.values[name]}
@@ -29,13 +31,60 @@ const Input = ({ label, name, type, formik, readOnly }) => (
   </div>
 );
 
+/* ----------------- react‑select shared styles ----------------- */
+const getSelectStyles = (hasError) => ({
+  control: (base) => ({
+    ...base,
+    backgroundColor: "#fff",
+    borderColor: hasError ? "#e74c3c" : "#ddd",
+    borderWidth: "2px",
+    borderRadius: "8px",
+    padding: "2px 6px",
+    fontSize: "0.875rem",
+    minHeight: "38px",
+    boxShadow: "none",
+    "&:hover": {
+      borderColor: hasError ? "#e74c3c" : "#ac70c6",
+    },
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: "#333", // نفس لون النص في الانبتس
+  }),
+  input: (base) => ({
+    ...base,
+    color: "#333",
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: "#aaa",
+  }),
+  option: (base, { isFocused, isSelected }) => ({
+    ...base,
+    backgroundColor: isSelected
+      ? "#d8b4f8" // موف فاتح عند التحديد
+      : isFocused
+      ? "#f9edfc" // خلفية أفتح عند hover
+      : "#fff",
+    color: "#6b48a3", // لون نص موف جميل
+    fontSize: "0.875rem",
+    padding: "10px 12px",
+    cursor: "pointer",
+  }),
+  menu: (base) => ({
+    ...base,
+    borderRadius: "8px",
+    boxShadow: "0 4px 10px rgba(172, 112, 198, 0.1)",
+  }),
+});
+
+/* -------------------------------------------------------------- */
 export default function AddEmployee() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [fileName, setFileName] = useState("No chosen file");
 
-  const DEFAULT_AVATAR = null; // ضع مسار لصورة افتراضية إذا لزم الأمر
-
+  /* ---------- load departments ---------- */
   const { data: departmentsData, isError } = useQuery({
     queryKey: ["departments"],
     queryFn: () => api.get("/departments").then((r) => r.data),
@@ -43,7 +92,12 @@ export default function AddEmployee() {
   const departments = Array.isArray(departmentsData)
     ? departmentsData
     : departmentsData?.data ?? [];
+  const departmentOptions = departments.map((d) => ({
+    value: d.id,
+    label: d.dept_name,
+  }));
 
+  /* ---------- validation ---------- */
   const schema = yup.object({
     first_name: yup
       .string()
@@ -70,17 +124,12 @@ export default function AddEmployee() {
       .date()
       .max(new Date(new Date().setFullYear(new Date().getFullYear() - 20)))
       .required(),
-    working_hours_per_day: yup
-      .number()
-      .integer("Must be an integer")
-      .min(1)
-      .max(24)
-      .required(),
+    working_hours_per_day: yup.number().integer().min(1).max(24).required(),
     department_id: yup.number().required(),
   });
 
+  /* ---------- formik ---------- */
   const today = new Date().toISOString().slice(0, 10);
-
   const formik = useFormik({
     initialValues: {
       first_name: "",
@@ -104,29 +153,15 @@ export default function AddEmployee() {
     onSubmit: handleSubmit,
   });
 
-  // حساب ساعات العمل تلقائيًا
+  /* ---------- auto‑calc working hours ---------- */
   useEffect(() => {
     const { default_check_in_time, default_check_out_time } = formik.values;
     if (default_check_in_time && default_check_out_time) {
-      const [inHours, inMinutes] = default_check_in_time.split(":").map(Number);
-      const [outHours, outMinutes] = default_check_out_time
-        .split(":")
-        .map(Number);
-
-      let hoursDiff = outHours - inHours;
-      let minutesDiff = outMinutes - inMinutes;
-
-      // تحويل الفارق إلى ساعات
-      if (minutesDiff < 0) {
-        hoursDiff -= 1;
-        minutesDiff += 60;
-      }
-      if (hoursDiff < 0) {
-        hoursDiff += 24; // التعامل مع الانصراف في اليوم التالي
-      }
-
-      const totalHours = hoursDiff + minutesDiff / 60;
-      formik.setFieldValue("working_hours_per_day", Math.round(totalHours));
+      const [inH, inM] = default_check_in_time.split(":").map(Number);
+      const [outH, outM] = default_check_out_time.split(":").map(Number);
+      let hours = outH - inH + (outM - inM) / 60;
+      if (hours < 0) hours += 24;
+      formik.setFieldValue("working_hours_per_day", Math.round(hours));
     } else {
       formik.setFieldValue("working_hours_per_day", "");
     }
@@ -135,83 +170,65 @@ export default function AddEmployee() {
     formik.values.default_check_out_time,
   ]);
 
-  // تحقق من الملف المرفوع
+  /* ---------- file validation ---------- */
   const handleFileChange = (e) => {
     const file = e.currentTarget.files[0];
-    if (file) {
-      const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
-      if (!validImageTypes.includes(file.type)) {
-        toast.error("Please upload a valid image file (JPEG, PNG, or GIF).");
-        return;
-      }
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        toast.error("File size exceeds 5MB limit.");
-        return;
-      }
-      formik.setFieldValue("profile_picture", file);
-      setFileName(file.name);
-    } else {
+    if (!file) {
       formik.setFieldValue("profile_picture", null);
       setFileName("No chosen file");
+      return;
     }
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Only JPEG, PNG, GIF allowed");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Max size 5 MB");
+      return;
+    }
+    formik.setFieldValue("profile_picture", file);
+    setFileName(file.name);
   };
 
+  /* ---------- submit ---------- */
   function handleSubmit(values, { setSubmitting }) {
     const fd = new FormData();
-
-    if (!values.profile_picture && DEFAULT_AVATAR) {
-      fd.append("default_avatar", DEFAULT_AVATAR);
-    }
-
     Object.entries(values).forEach(([k, v]) => {
-      if (k === "profile_picture" && v) {
-        fd.append("profile_picture", v);
-      } else if (k === "working_hours_per_day" && v !== "") {
-        fd.append(k, Number(v)); // التأكد من إن working_hours_per_day يترسل كرقم صحيح
-      } else {
-        fd.append(k, v ?? "");
-      }
+      if (k === "profile_picture" && v) fd.append(k, v);
+      else fd.append(k, v ?? "");
     });
 
     api
       .post("/employees", fd)
       .then(() => {
-        toast.success("Employee added successfully");
+        toast.success("Employee added");
         qc.invalidateQueries({ queryKey: ["employees"] });
         navigate("/employees");
       })
       .catch((err) => {
         setSubmitting(false);
-        if (err.response?.status === 422 && err.response.data.errors) {
-          const errs = err.response.data.errors;
-          formik.setErrors(errs);
-          Object.keys(errs).forEach((field) =>
-            formik.setFieldTouched(field, true, false)
-          );
-          if (errs.profile_picture) {
-            toast.error(
-              `Profile picture error: ${errs.profile_picture.join(", ")}`
-            );
-          } else if (errs.working_hours_per_day) {
-            toast.error(
-              `Working hours error: ${errs.working_hours_per_day.join(", ")}`
-            );
-          } else {
-            toast.error("Please fix the highlighted errors");
-          }
-        } else {
-          toast.error(`Failed to add employee: ${err.message}`);
-        }
+        if (err.response?.status === 422) {
+          formik.setErrors(err.response.data.errors || {});
+          toast.error("Check validation errors");
+        } else toast.error("Failed to add");
       });
   }
 
   if (isError)
     return <div className="alert alert-danger">Failed to load departments</div>;
 
+  /* ---------- options ---------- */
+  const genderOptions = [
+    { value: "Male", label: "Male" },
+    { value: "Female", label: "Female" },
+  ];
+
+  /* ---------- UI ---------- */
   return (
     <div className="employee-page-wrapper">
       <ToastContainer position="bottom-end" autoClose={3000} />
+      {/* header */}
       <div className="employee-header">
         <div className="employee-header-title ms-5">
           <span className="employee-header-icon">
@@ -221,12 +238,14 @@ export default function AddEmployee() {
         </div>
       </div>
 
+      {/* form */}
       <div className="employee-form-container">
         <form
           noValidate
           onSubmit={formik.handleSubmit}
           encType="multipart/form-data"
         >
+          {/* === Personal Info === */}
           <fieldset className="border p-3 mb-4 rounded">
             <legend className="float-none w-auto px-3">Personal Info</legend>
             <div className="row g-3">
@@ -262,26 +281,26 @@ export default function AddEmployee() {
                 type="date"
                 formik={formik}
               />
+              {/* Gender select */}
               <div className="col-md-6 mb-3">
                 <label className="form-label">Gender</label>
-                <select
+                <Select
                   name="gender"
-                  className={
-                    "form-select employee-form-container" +
-                    (formik.touched.gender && formik.errors.gender
-                      ? " is-invalid"
-                      : "")
-                  }
-                  value={formik.values.gender}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
+                  options={genderOptions}
+                  value={genderOptions.find(
+                    (o) => o.value === formik.values.gender
+                  )}
+                  onChange={(o) => formik.setFieldValue("gender", o.value)}
+                  onBlur={() => formik.setFieldTouched("gender", true)}
+                  styles={getSelectStyles(
+                    formik.touched.gender && formik.errors.gender
+                  )}
+                  placeholder="Select Gender"
+                />
                 {formik.touched.gender && formik.errors.gender && (
-                  <div className="invalid-feedback">{formik.errors.gender}</div>
+                  <div className="invalid-feedback d-block">
+                    {formik.errors.gender}
+                  </div>
                 )}
               </div>
               <Input
@@ -293,6 +312,7 @@ export default function AddEmployee() {
             </div>
           </fieldset>
 
+          {/* === Job Settings === */}
           <fieldset className="border p-3 mb-4 rounded">
             <legend className="float-none w-auto px-3">Job Settings</legend>
             <div className="row g-3">
@@ -325,41 +345,36 @@ export default function AddEmployee() {
                 name="working_hours_per_day"
                 type="number"
                 formik={formik}
-                readOnly={true}
+                readOnly
               />
+
+              {/* Department select */}
               <div className="col-md-6 mb-3">
                 <label className="form-label">Department</label>
-                <select
+                <Select
                   name="department_id"
-                  className={
-                    "form-select employee-form-container" +
-                    (formik.touched.department_id && formik.errors.department_id
-                      ? " is-invalid"
-                      : "")
+                  options={departmentOptions}
+                  value={departmentOptions.find(
+                    (o) => o.value === formik.values.department_id
+                  )}
+                  onChange={(o) =>
+                    formik.setFieldValue("department_id", o.value)
                   }
-                  value={formik.values.department_id}
-                  onChange={(e) =>
-                    formik.setFieldValue(
-                      "department_id",
-                      Number(e.target.value)
-                    )
-                  }
-                  onBlur={formik.handleBlur}
-                >
-                  <option value="">Select Department</option>
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.dept_name}
-                    </option>
-                  ))}
-                </select>
+                  onBlur={() => formik.setFieldTouched("department_id", true)}
+                  styles={getSelectStyles(
+                    formik.touched.department_id && formik.errors.department_id
+                  )}
+                  placeholder="Select Department"
+                />
                 {formik.touched.department_id &&
                   formik.errors.department_id && (
-                    <div className="invalid-feedback">
+                    <div className="invalid-feedback d-block">
                       {formik.errors.department_id}
                     </div>
                   )}
               </div>
+
+              {/* File upload */}
               <div className="col-md-6 mb-3">
                 <label className="form-label">Profile Picture</label>
                 <input
@@ -377,10 +392,11 @@ export default function AddEmployee() {
             </div>
           </fieldset>
 
+          {/* submit */}
           <div className="d-grid">
             <button
               type="submit"
-              className="employee-form-button"
+              className="employee-form-button-addEdit"
               disabled={
                 formik.isSubmitting || Object.keys(formik.errors).length > 0
               }

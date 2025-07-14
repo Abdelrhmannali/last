@@ -41,7 +41,7 @@ export default function SettingsPage() {
       const { data } = await api.get("/settings");
       const settingsData = Array.isArray(data.data) ? data.data : data.data ? [data.data] : [];
       setSettings(settingsData);
-      toast.success("Settings loaded!", { position: "top-right", autoClose: 1000 });
+      
     } catch (error) {
       console.error("Error fetching settings:", error.response?.data || error.message);
       toast.error("Failed to load settings!", { position: "top-right", autoClose: 1000 });
@@ -142,16 +142,27 @@ const handleCheckboxChange = (day) => {
 
   const handleEdit = (setting) => {
     setEditSetting(setting);
+    let parsedWeekendDays = [];
+    if (typeof setting.weekend_days === 'string') {
+      try {
+        parsedWeekendDays = JSON.parse(setting.weekend_days);
+      } catch (e) {
+        console.error("Failed to parse weekend_days string:", e);
+        parsedWeekendDays = []; 
+      }
+    } else if (Array.isArray(setting.weekend_days)) {
+      parsedWeekendDays = setting.weekend_days;
+    }
+
     setForm({
       employee_id: String(setting.employee_id),
       deduction_type: setting.deduction_type,
       deduction_value: setting.deduction_value,
       overtime_type: setting.overtime_type,
       overtime_value: setting.overtime_value,
-     weekend_days: setting.weekend_days || [],
+      weekend_days: parsedWeekendDays, 
     });
   };
-
   const handleShowConfirm = (setting) => {
     setSettingToDelete(setting);
     setEditSetting(null);
@@ -247,6 +258,7 @@ const handleCheckboxChange = (day) => {
         </div>
         <div className="set-stat-card set-chart-card">
           <h3>Weekend Days Distribution</h3>
+          
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={weekendDaysData}>
               <CartesianGrid strokeDasharray="3 3" />

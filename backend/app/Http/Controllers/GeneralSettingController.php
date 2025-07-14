@@ -42,7 +42,7 @@ class GeneralSettingController extends Controller
 
         $data = $request->validated();
 
-        $data['weekend_days'] = json_encode($data['weekend_days']);
+        $data['weekend_days'] = ($data['weekend_days']);
  
         $setting = GeneralSetting::create($data);
  
@@ -88,7 +88,7 @@ class GeneralSettingController extends Controller
  
         if (isset($data['weekend_days'])) {
 
-            $data['weekend_days'] = json_encode($data['weekend_days']);
+            $data['weekend_days'] = ($data['weekend_days']);
 
         }
  

@@ -31,7 +31,7 @@ const Login = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setMessage("❌ Please correct the errors in the form.");
+      setMessage(" Please correct the errors in the form.");
       return;
     }
 
@@ -39,10 +39,10 @@ const Login = () => {
     try {
       const response = await api.post("hr/login", { email, password });
       localStorage.setItem("token", response.data.token);
-      setMessage("✅ Login successful.");
-      navigate("/holidays");
+     
+      navigate("/Dashboard");
     } catch (error) {
-      setMessage("❌ Invalid email or password.");
+      setMessage(" Invalid email or password.");
     } finally {
       setLoading(false);
     }
@@ -122,10 +122,7 @@ const Login = () => {
             </div>
 
             <div className="form-options">
-              <div className="remember-row">
-                <input type="checkbox" id="remember" disabled={loading} />
-                <label htmlFor="remember">Remember me</label>
-              </div>
+              
               <div className="password-row">
                 <a href="/forgot-password" className="forgot-link">Forgot password?</a>
               </div>

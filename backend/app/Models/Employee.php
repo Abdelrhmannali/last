@@ -10,6 +10,7 @@ class Employee extends Model
 {
     use HasFactory;
     use Notifiable;
+    
 
     protected $fillable = [
         'first_name', 'last_name', 'email', 'phone', 'address', 'salary',
